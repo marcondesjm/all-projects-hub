@@ -13,9 +13,10 @@ interface HeaderProps {
   onViewModeChange: (mode: 'grid' | 'list') => void;
   onNewProject?: () => void;
   mobileMenuTrigger?: ReactNode;
+  onOpenSearch?: () => void;
 }
 
-export function Header({ searchQuery, onSearchChange, viewMode, onViewModeChange, onNewProject, mobileMenuTrigger }: HeaderProps) {
+export function Header({ searchQuery, onSearchChange, viewMode, onViewModeChange, onNewProject, mobileMenuTrigger, onOpenSearch }: HeaderProps) {
   return (
     <header className="h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between border-b border-border bg-card/50 backdrop-blur-sm gap-2 sm:gap-4">
       {/* Mobile Menu */}
@@ -25,20 +26,28 @@ export function Header({ searchQuery, onSearchChange, viewMode, onViewModeChange
       <div className="flex-1 max-w-xl">
         <Tooltip>
           <TooltipTrigger asChild>
-            <div className="relative">
+            <div 
+              className="relative cursor-pointer"
+              onClick={onOpenSearch}
+            >
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
-                placeholder="Buscar projetos..."
+                placeholder="Buscar projetos... (⌘K)"
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="pl-10 bg-background border-border focus-visible:ring-primary/20 text-sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenSearch?.();
+                }}
+                className="pl-10 bg-background border-border focus-visible:ring-primary/20 text-sm cursor-pointer"
                 aria-label="Buscar projetos por nome, tag ou descrição"
+                readOnly={!!onOpenSearch}
               />
             </div>
           </TooltipTrigger>
           <TooltipContent side="bottom">
-            <p>Busque por nome, descrição ou tags</p>
+            <p>Busca global (⌘K ou Ctrl+K)</p>
           </TooltipContent>
         </Tooltip>
       </div>

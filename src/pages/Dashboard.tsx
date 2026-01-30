@@ -4,6 +4,7 @@ import { MobileSidebar } from '@/components/layout/MobileSidebar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { Header } from '@/components/layout/Header';
 import { StatsCards } from '@/components/dashboard/StatsCards';
+import { ProjectCharts } from '@/components/dashboard/ProjectCharts';
 import { FilterBar } from '@/components/projects/FilterBar';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectList } from '@/components/projects/ProjectList';
@@ -267,6 +268,9 @@ export default function Dashboard() {
         <main className="flex-1 overflow-y-auto p-3 sm:p-6 pb-20 lg:pb-6 scrollbar-thin">
           {/* Stats */}
           <StatsCards {...stats} />
+
+          {/* Charts */}
+          <ProjectCharts projects={projects} />
 
           {/* Title */}
           <div className="flex items-center justify-between mb-4">

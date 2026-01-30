@@ -264,6 +264,74 @@ export type Database = {
         }
         Relationships: []
       }
+      deadline_notification_settings: {
+        Row: {
+          created_at: string
+          days_before: number
+          id: string
+          is_active: boolean
+          message_template: string
+          notify_collaborators: boolean
+          notify_owner: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          days_before?: number
+          id?: string
+          is_active?: boolean
+          message_template?: string
+          notify_collaborators?: boolean
+          notify_owner?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          days_before?: number
+          id?: string
+          is_active?: boolean
+          message_template?: string
+          notify_collaborators?: boolean
+          notify_owner?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      deadline_notifications_sent: {
+        Row: {
+          deadline_date: string
+          id: string
+          project_id: string
+          sent_at: string
+          user_id: string
+        }
+        Insert: {
+          deadline_date: string
+          id?: string
+          project_id: string
+          sent_at?: string
+          user_id: string
+        }
+        Update: {
+          deadline_date?: string
+          id?: string
+          project_id?: string
+          sent_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deadline_notifications_sent_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lovable_accounts: {
         Row: {
           color: string

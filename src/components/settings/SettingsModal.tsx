@@ -14,12 +14,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User, Shield, Palette, Database, Trash2, RotateCcw, HelpCircle } from 'lucide-react';
+import { Loader2, User, Shield, Palette, Database, Trash2, RotateCcw, HelpCircle, Bell } from 'lucide-react';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { useSeedDemoData } from '@/hooks/useSeedDemoData';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
+import { DeadlineNotificationSettings } from './DeadlineNotificationSettings';
 
 interface SettingsModalProps {
   open: boolean;
@@ -212,7 +213,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="profile" className="gap-1 text-xs">
               <User className="w-3 h-3" />
               Perfil
@@ -220,6 +221,10 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
             <TabsTrigger value="security" className="gap-1 text-xs">
               <Shield className="w-3 h-3" />
               Segurança
+            </TabsTrigger>
+            <TabsTrigger value="notifications" className="gap-1 text-xs">
+              <Bell className="w-3 h-3" />
+              Alertas
             </TabsTrigger>
             <TabsTrigger value="appearance" className="gap-1 text-xs">
               <Palette className="w-3 h-3" />
@@ -309,6 +314,11 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 )}
               </Button>
             </form>
+          </TabsContent>
+
+          {/* Notifications Tab */}
+          <TabsContent value="notifications" className="mt-4">
+            <DeadlineNotificationSettings />
           </TabsContent>
 
           {/* Appearance Tab */}

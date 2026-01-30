@@ -86,6 +86,56 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_receipts: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          notes: string | null
+          receipt_url: string
+          status: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          receipt_url: string
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          notes?: string | null
+          receipt_url?: string
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payment_receipts_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -235,10 +285,17 @@ export type Database = {
           expires_at: string | null
           features: Json
           id: string
+          is_trial: boolean | null
           max_accounts: number
           max_projects: number
+          payment_receipt_url: string | null
+          payment_status: string | null
+          payment_verified_at: string | null
+          payment_verified_by: string | null
           plan: Database["public"]["Enums"]["subscription_plan"]
           started_at: string
+          trial_ends_at: string | null
+          trial_started_at: string | null
           updated_at: string
           user_id: string
         }
@@ -247,10 +304,17 @@ export type Database = {
           expires_at?: string | null
           features?: Json
           id?: string
+          is_trial?: boolean | null
           max_accounts?: number
           max_projects?: number
+          payment_receipt_url?: string | null
+          payment_status?: string | null
+          payment_verified_at?: string | null
+          payment_verified_by?: string | null
           plan?: Database["public"]["Enums"]["subscription_plan"]
           started_at?: string
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
           updated_at?: string
           user_id: string
         }
@@ -259,10 +323,17 @@ export type Database = {
           expires_at?: string | null
           features?: Json
           id?: string
+          is_trial?: boolean | null
           max_accounts?: number
           max_projects?: number
+          payment_receipt_url?: string | null
+          payment_status?: string | null
+          payment_verified_at?: string | null
+          payment_verified_by?: string | null
           plan?: Database["public"]["Enums"]["subscription_plan"]
           started_at?: string
+          trial_ends_at?: string | null
+          trial_started_at?: string | null
           updated_at?: string
           user_id?: string
         }

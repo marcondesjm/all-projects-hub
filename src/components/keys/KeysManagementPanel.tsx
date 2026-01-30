@@ -510,27 +510,62 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
                 </Accordion>
               )}
 
+              {/* Campos disponíveis (quando não há keys) */}
+              {accountsWithKeys.length === 0 && (
+                <div className="pt-4 border-t">
+                  <p className="text-xs text-muted-foreground mb-3">
+                    Campos disponíveis para cadastro:
+                  </p>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
+                      <span className="text-sm">URL Supabase</span>
+                      <code className="text-xs text-muted-foreground">https://xxx.supabase.co</code>
+                    </div>
+                    <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
+                      <span className="text-sm">Anon Key</span>
+                      <code className="text-xs text-muted-foreground">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code>
+                    </div>
+                    <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
+                      <span className="text-sm">Service Role Key</span>
+                      <code className="text-xs text-muted-foreground">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code>
+                    </div>
+                    <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
+                      <span className="text-sm">OpenAI Key</span>
+                      <code className="text-xs text-muted-foreground">sk-proj-...</code>
+                    </div>
+                    <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
+                      <span className="text-sm">Keys Personalizadas</span>
+                      <code className="text-xs text-muted-foreground">Nome + Valor</code>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Contas sem keys */}
               {accountsWithoutKeys.length > 0 && (
                 <div className="pt-4 border-t">
                   <p className="text-xs text-muted-foreground mb-2">
                     Contas sem keys cadastradas:
                   </p>
-                  <div className="flex flex-wrap gap-2">
-                    {accountsWithoutKeys.map((account) => (
-                      <Badge 
-                        key={account.id} 
-                        variant="outline" 
-                        className="gap-1 opacity-60"
-                      >
-                        <div className={cn(
-                          'w-2 h-2 rounded-full',
-                          colorClasses[account.color]
-                        )} />
-                        {account.name}
-                      </Badge>
-                    ))}
-                  </div>
+                  <ScrollArea className="max-h-32">
+                    <div className="flex flex-wrap gap-2 pr-2">
+                      {accountsWithoutKeys.map((account) => (
+                        <Badge 
+                          key={account.id} 
+                          variant="outline" 
+                          className="gap-1 opacity-60 cursor-pointer hover:opacity-100 transition-opacity"
+                          onClick={() => startEditing(account.id)}
+                        >
+                          <div className={cn(
+                            'w-2 h-2 rounded-full',
+                            colorClasses[account.color]
+                          )} />
+                          {account.name}
+                          <Plus className="w-3 h-3 ml-1" />
+                        </Badge>
+                      ))}
+                    </div>
+                  </ScrollArea>
                 </div>
               )}
             </div>

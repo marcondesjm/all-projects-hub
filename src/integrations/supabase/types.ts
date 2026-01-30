@@ -14,6 +14,50 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_collaborators: {
+        Row: {
+          accepted_at: string | null
+          account_id: string
+          created_at: string
+          id: string
+          invited_by: string
+          invited_email: string
+          role: Database["public"]["Enums"]["collaboration_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          account_id: string
+          created_at?: string
+          id?: string
+          invited_by: string
+          invited_email: string
+          role?: Database["public"]["Enums"]["collaboration_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          account_id?: string
+          created_at?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string
+          role?: Database["public"]["Enums"]["collaboration_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_collaborators_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "lovable_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       activity_logs: {
         Row: {
           action: string
@@ -46,6 +90,48 @@ export type Database = {
           id?: string
           ip_address?: string | null
           metadata?: Json | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      collaboration_notifications: {
+        Row: {
+          actor_id: string | null
+          actor_name: string | null
+          created_at: string
+          entity_id: string
+          entity_type: string
+          id: string
+          message: string
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          actor_name?: string | null
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          id?: string
+          message: string
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          actor_name?: string | null
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          id?: string
+          message?: string
+          read_at?: string | null
+          title?: string
+          type?: string
           user_id?: string
         }
         Relationships: []
@@ -177,6 +263,50 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      project_collaborators: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          id: string
+          invited_by: string
+          invited_email: string
+          project_id: string
+          role: Database["public"]["Enums"]["collaboration_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          invited_by: string
+          invited_email: string
+          project_id: string
+          role?: Database["public"]["Enums"]["collaboration_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string
+          project_id?: string
+          role?: Database["public"]["Enums"]["collaboration_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_collaborators_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       project_tags: {
         Row: {
@@ -418,6 +548,14 @@ export type Database = {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      has_account_access: {
+        Args: { _account_id: string; _user_id: string }
+        Returns: boolean
+      }
+      has_project_access: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -425,10 +563,19 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_account_owner: {
+        Args: { _account_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_admin: { Args: never; Returns: boolean }
+      is_project_owner: {
+        Args: { _project_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "viewer" | "collaborator"
+      collaboration_role: "viewer" | "editor" | "admin"
       subscription_plan: "free" | "pro" | "business"
     }
     CompositeTypes: {
@@ -558,6 +705,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "viewer", "collaborator"],
+      collaboration_role: ["viewer", "editor", "admin"],
       subscription_plan: ["free", "pro", "business"],
     },
   },

@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { NotificationCenter, Notification } from '@/components/notifications/NotificationCenter';
+import { CollaborationNotifications } from '@/components/collaboration/CollaborationNotifications';
 import { ReactNode } from 'react';
 
 interface HeaderProps {
@@ -120,7 +121,10 @@ export function Header({
         {/* Theme Toggle */}
         <ThemeToggle />
 
-        {/* Notifications */}
+        {/* Collaboration Notifications */}
+        <CollaborationNotifications />
+
+        {/* System Notifications */}
         <NotificationCenter
           notifications={notifications}
           onMarkAsRead={onMarkAsRead}

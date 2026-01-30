@@ -1,4 +1,4 @@
-import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye, Archive, Coins, AlertTriangle, Calendar, History } from 'lucide-react';
+import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye, Archive, Coins, AlertTriangle, Calendar, History, CheckSquare } from 'lucide-react';
 import { Project } from '@/types/project';
 import { LovableAccount } from '@/hooks/useProjects';
 import { cn } from '@/lib/utils';
@@ -18,10 +18,17 @@ import { ProjectHoverCard } from './ProjectHoverCard';
 import { ProjectCardOnlineUsers } from './ProjectCardOnlineUsers';
 import { ProjectUserPresence } from '@/hooks/useProjectPresence';
 
+interface ChecklistProgress {
+  total: number;
+  completed: number;
+  percentage: number;
+}
+
 interface ProjectCardProps {
   project: Project;
   account?: LovableAccount;
   onlineUsers?: ProjectUserPresence[];
+  checklistProgress?: ChecklistProgress;
   onToggleFavorite: (projectId: string) => void;
   onEdit?: (projectId: string) => void;
   onDelete?: (projectId: string) => void;
@@ -44,7 +51,7 @@ const statusConfig = {
   archived: { label: 'Arquivado', className: 'bg-status-archived/10 text-status-archived border-status-archived/20' },
 };
 
-export function ProjectCard({ project, account, onlineUsers = [], onToggleFavorite, onEdit, onDelete, onArchive, onDeadlineChange, onShowHistory }: ProjectCardProps) {
+export function ProjectCard({ project, account, onlineUsers = [], checklistProgress, onToggleFavorite, onEdit, onDelete, onArchive, onDeadlineChange, onShowHistory }: ProjectCardProps) {
   const status = statusConfig[project.status];
   
   // Check if project is overdue
@@ -228,6 +235,48 @@ export function ProjectCard({ project, account, onlineUsers = [], onToggleFavori
               </TooltipTrigger>
               <TooltipContent>
                 <p>{project.progress}% concluído</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+        )}
+
+        {/* Checklist Progress */}
+        {checklistProgress && checklistProgress.total > 0 && (
+          <div className="mb-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="flex items-center gap-2 p-2 rounded-md bg-muted/50">
+                  <CheckSquare className={cn(
+                    "w-4 h-4",
+                    checklistProgress.percentage === 100 ? "text-status-published" : "text-primary"
+                  )} />
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between text-xs mb-1">
+                      <span className="text-muted-foreground">Tarefas</span>
+                      <span className={cn(
+                        "font-medium",
+                        checklistProgress.percentage === 100 ? "text-status-published" : "text-foreground"
+                      )}>
+                        {checklistProgress.completed}/{checklistProgress.total}
+                      </span>
+                    </div>
+                    <Progress 
+                      value={checklistProgress.percentage} 
+                      className={cn(
+                        "h-1.5",
+                        checklistProgress.percentage === 100 && "[&>div]:bg-status-published"
+                      )}
+                    />
+                  </div>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {checklistProgress.percentage === 100 
+                    ? '✅ Todas as tarefas concluídas!' 
+                    : `${checklistProgress.completed} de ${checklistProgress.total} tarefas concluídas`
+                  }
+                </p>
               </TooltipContent>
             </Tooltip>
           </div>

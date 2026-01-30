@@ -21,12 +21,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUpdateProject, useAccounts, useTags, Project } from '@/hooks/useProjects';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, X, FileEdit, History } from 'lucide-react';
+import { Loader2, X, FileEdit, History, CheckSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { CoverUpload } from './CoverUpload';
 import { DeadlinePicker } from './DeadlinePicker';
 import { ProjectHistoryPanel } from './ProjectHistoryPanel';
+import { ProjectChecklist } from './ProjectChecklist';
 
 interface EditProjectModalProps {
   open: boolean;
@@ -158,10 +159,14 @@ export function EditProjectModal({ open, onOpenChange, project }: EditProjectMod
         </DialogHeader>
         
         <Tabs defaultValue="details" className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="details" className="gap-2">
               <FileEdit className="h-4 w-4" />
               Detalhes
+            </TabsTrigger>
+            <TabsTrigger value="checklist" className="gap-2">
+              <CheckSquare className="h-4 w-4" />
+              Checklist
             </TabsTrigger>
             <TabsTrigger value="history" className="gap-2">
               <History className="h-4 w-4" />
@@ -349,6 +354,10 @@ export function EditProjectModal({ open, onOpenChange, project }: EditProjectMod
             </Button>
           </DialogFooter>
         </form>
+          </TabsContent>
+          
+          <TabsContent value="checklist" className="mt-4">
+            <ProjectChecklist projectId={project.id} isOwner={true} />
           </TabsContent>
           
           <TabsContent value="history" className="mt-4">

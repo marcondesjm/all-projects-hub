@@ -232,6 +232,15 @@ export default function Admin() {
   };
 
   const handleDeleteUser = (user: AdminUser) => {
+    // Bloqueia exclusão de administradores
+    if (user.role === 'admin') {
+      toast({
+        title: 'Ação não permitida',
+        description: 'Não é possível excluir usuários administradores.',
+        variant: 'destructive',
+      });
+      return;
+    }
     setSelectedUser(user);
     setDeleteDialogOpen(true);
   };
@@ -776,13 +785,15 @@ export default function Admin() {
                                       </DropdownMenuItem>
                                     )}
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem 
-                                      onClick={() => handleDeleteUser(user)}
-                                      className="text-destructive focus:text-destructive"
-                                    >
-                                      <Trash2 className="w-4 h-4 mr-2" />
-                                      Excluir Usuário
-                                    </DropdownMenuItem>
+                                    {user.role !== 'admin' && (
+                                      <DropdownMenuItem 
+                                        onClick={() => handleDeleteUser(user)}
+                                        className="text-destructive focus:text-destructive"
+                                      >
+                                        <Trash2 className="w-4 h-4 mr-2" />
+                                        Excluir Usuário
+                                      </DropdownMenuItem>
+                                    )}
                                   </DropdownMenuContent>
                                 </DropdownMenu>
                               </TableCell>

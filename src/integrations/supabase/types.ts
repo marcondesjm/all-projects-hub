@@ -218,6 +218,7 @@ export type Database = {
         Row: {
           account_id: string
           created_at: string
+          deadline: string | null
           description: string | null
           id: string
           is_favorite: boolean
@@ -236,6 +237,7 @@ export type Database = {
         Insert: {
           account_id: string
           created_at?: string
+          deadline?: string | null
           description?: string | null
           id?: string
           is_favorite?: boolean
@@ -254,6 +256,7 @@ export type Database = {
         Update: {
           account_id?: string
           created_at?: string
+          deadline?: string | null
           description?: string | null
           id?: string
           is_favorite?: boolean

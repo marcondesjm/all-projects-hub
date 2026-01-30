@@ -94,6 +94,7 @@ export function AddProjectModal({ open, onOpenChange }: AddProjectModalProps) {
         screenshot: coverUrl,
         notes: null,
         progress: 0,
+        deadline: null,
         tagIds: selectedTags,
       });
       

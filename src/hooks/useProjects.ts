@@ -38,6 +38,7 @@ export interface Project {
   progress: number;
   created_at: string;
   updated_at: string;
+  deadline: string | null;
   tags?: Tag[];
 }
 

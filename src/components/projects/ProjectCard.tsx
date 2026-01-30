@@ -1,4 +1,4 @@
-import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye, Archive, Coins } from 'lucide-react';
+import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye, Archive, Coins, AlertTriangle } from 'lucide-react';
 import { Project } from '@/types/project';
 import { LovableAccount } from '@/hooks/useProjects';
 import { cn } from '@/lib/utils';
@@ -15,6 +15,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ProjectHoverCard } from './ProjectHoverCard';
+
 interface ProjectCardProps {
   project: Project;
   account?: LovableAccount;
@@ -40,6 +41,12 @@ const statusConfig = {
 
 export function ProjectCard({ project, account, onToggleFavorite, onEdit, onDelete, onArchive }: ProjectCardProps) {
   const status = statusConfig[project.status];
+  
+  // Check if project is overdue
+  const isOverdue = project.deadline && 
+    new Date(project.deadline) < new Date() && 
+    project.status !== 'published' && 
+    project.status !== 'archived';
 
   const handleOpenProject = () => {
     if (project.url) {
@@ -55,7 +62,10 @@ export function ProjectCard({ project, account, onToggleFavorite, onEdit, onDele
 
   return (
     <ProjectHoverCard project={project} account={account}>
-    <div className="group bg-card rounded-xl border border-border shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden hover-lift">
+    <div className={cn(
+      "group bg-card rounded-xl border shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden hover-lift",
+      isOverdue ? "border-destructive/50 ring-1 ring-destructive/20" : "border-border"
+    )}>
       {/* Screenshot */}
       <div className="relative aspect-video bg-muted overflow-hidden">
         {project.screenshot ? (
@@ -68,6 +78,21 @@ export function ProjectCard({ project, account, onToggleFavorite, onEdit, onDele
           <div className="w-full h-full flex items-center justify-center text-muted-foreground">
             <Eye className="w-8 h-8" />
           </div>
+        )}
+
+        {/* Overdue Indicator */}
+        {isOverdue && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="absolute top-3 left-12 flex items-center gap-1 bg-destructive text-destructive-foreground text-xs px-2 py-1 rounded-full">
+                <AlertTriangle className="w-3 h-3" />
+                <span>Atrasado</span>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Prazo: {formatDistanceToNow(new Date(project.deadline!), { addSuffix: true, locale: ptBR })}</p>
+            </TooltipContent>
+          </Tooltip>
         )}
         
         {/* Overlay Actions */}

@@ -21,6 +21,7 @@ const demoProjects = [
     is_favorite: true,
     notes: 'Projeto exemplo para demonstrar funcionalidades do painel.',
     view_count: 245,
+    deadline: null, // Completed, no deadline
   },
   {
     name: 'Landing Page Startup',
@@ -32,6 +33,7 @@ const demoProjects = [
     progress: 100,
     is_favorite: false,
     view_count: 189,
+    deadline: null, // Completed, no deadline
   },
   {
     name: 'Dashboard Analytics',
@@ -44,18 +46,20 @@ const demoProjects = [
     is_favorite: false,
     notes: 'Em desenvolvimento - falta integrar API de dados.',
     view_count: 67,
+    deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days overdue
   },
   {
     name: 'Funil de Vendas Curso',
     description: 'Funil completo com VSL, página de vendas e checkout',
     url: 'https://curso-digital.lovable.app',
     screenshot: 'https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a?w=800&h=450&fit=crop',
-    status: 'archived',
+    status: 'draft',
     type: 'funnel',
-    progress: 100,
+    progress: 40,
     is_favorite: false,
-    notes: 'Campanha encerrada. Guardando para referência.',
+    notes: 'Precisa finalizar urgente!',
     view_count: 1024,
+    deadline: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days overdue
   },
 ];
 

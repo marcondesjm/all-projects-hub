@@ -1,4 +1,4 @@
-import { FolderKanban, Star, Globe, Archive } from 'lucide-react';
+import { FolderKanban, Star, Globe, Archive, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface StatsCardsProps {
@@ -6,9 +6,10 @@ interface StatsCardsProps {
   favorites: number;
   published: number;
   archived: number;
+  overdue?: number;
 }
 
-export function StatsCards({ totalProjects, favorites, published, archived }: StatsCardsProps) {
+export function StatsCards({ totalProjects, favorites, published, archived, overdue = 0 }: StatsCardsProps) {
   const stats = [
     {
       label: 'Total de Projetos',
@@ -32,11 +33,12 @@ export function StatsCards({ totalProjects, favorites, published, archived }: St
       bgColor: 'bg-status-published/10',
     },
     {
-      label: 'Arquivados',
-      value: archived,
-      icon: Archive,
-      color: 'text-muted-foreground',
-      bgColor: 'bg-muted',
+      label: 'Atrasados',
+      value: overdue,
+      icon: AlertTriangle,
+      color: 'text-destructive',
+      bgColor: 'bg-destructive/10',
+      highlight: overdue > 0,
     },
   ];
 
@@ -48,14 +50,19 @@ export function StatsCards({ totalProjects, favorites, published, archived }: St
         return (
           <div
             key={stat.label}
-            className="bg-card rounded-xl border border-border p-4 shadow-card hover:shadow-card-hover transition-all duration-300"
+            className={cn(
+              'bg-card rounded-xl border border-border p-4 shadow-card hover:shadow-card-hover transition-all duration-300',
+              stat.highlight && 'border-destructive/50 animate-pulse'
+            )}
           >
             <div className="flex items-center gap-3">
               <div className={cn('p-2.5 rounded-lg', stat.bgColor)}>
                 <Icon className={cn('w-5 h-5', stat.color)} />
               </div>
               <div>
-                <p className="text-2xl font-bold text-card-foreground">{stat.value}</p>
+                <p className={cn('text-2xl font-bold text-card-foreground', stat.highlight && 'text-destructive')}>
+                  {stat.value}
+                </p>
                 <p className="text-sm text-muted-foreground">{stat.label}</p>
               </div>
             </div>

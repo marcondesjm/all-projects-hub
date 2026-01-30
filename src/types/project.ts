@@ -22,6 +22,7 @@ export interface Project {
   accountId: string;
   createdAt: Date;
   updatedAt: Date;
+  deadline?: Date | null;
   isFavorite: boolean;
   tags: string[];
   notes?: string;

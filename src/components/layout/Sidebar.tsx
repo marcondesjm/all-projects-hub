@@ -131,13 +131,24 @@ export function Sidebar({
                 <Users className="w-3.5 h-3.5" aria-hidden="true" />
                 <span>Contas</span>
               </div>
-              <ChevronDown 
-                className={cn(
-                  'w-3.5 h-3.5 transition-transform duration-200',
-                  accountsOpen ? 'rotate-0' : '-rotate-90'
-                )} 
-                aria-hidden="true"
-              />
+              <div className="flex items-center gap-2">
+                {!isLoading && accounts.length > 0 && (
+                  <span 
+                    className="flex items-center gap-1 text-xs bg-primary/20 text-primary px-1.5 py-0.5 rounded-full font-medium normal-case"
+                    aria-label={`Total de ${accounts.reduce((sum, acc) => sum + (acc.credits ?? 0), 0)} créditos`}
+                  >
+                    <Coins className="w-3 h-3" aria-hidden="true" />
+                    {accounts.reduce((sum, acc) => sum + (acc.credits ?? 0), 0)}
+                  </span>
+                )}
+                <ChevronDown 
+                  className={cn(
+                    'w-3.5 h-3.5 transition-transform duration-200',
+                    accountsOpen ? 'rotate-0' : '-rotate-90'
+                  )} 
+                  aria-hidden="true"
+                />
+              </div>
             </CollapsibleTrigger>
             <CollapsibleContent id="accounts-list" className="space-y-1 mt-1">
               {isLoading ? (

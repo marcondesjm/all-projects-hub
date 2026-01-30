@@ -160,16 +160,16 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col p-0">
-        <DialogHeader className="flex-shrink-0 p-6 pb-0">
+      <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-0 overflow-hidden">
+        <DialogHeader className="flex-shrink-0 p-6 pb-4">
           <DialogTitle>Adicionar Conta Lovable</DialogTitle>
           <DialogDescription>
             Adicione uma nova conta Lovable com informações do projeto Supabase.
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <ScrollArea className="flex-1 px-6">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
+          <ScrollArea className="flex-1 px-6 max-h-[calc(85vh-180px)]">
             <div className="space-y-4 py-4">
               {/* Informações Básicas */}
               <div className="space-y-4">

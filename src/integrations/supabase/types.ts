@@ -94,6 +94,134 @@ export type Database = {
         }
         Relationships: []
       }
+      api_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          last_used_at: string | null
+          name: string
+          scopes: string[] | null
+          token_hash: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name: string
+          scopes?: string[] | null
+          token_hash: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          last_used_at?: string | null
+          name?: string
+          scopes?: string[] | null
+          token_hash?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      audit_logs: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          ip_address: unknown
+          metadata: Json | null
+          resource_id: string | null
+          resource_type: string
+          severity: string
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type: string
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          ip_address?: unknown
+          metadata?: Json | null
+          resource_id?: string | null
+          resource_type?: string
+          severity?: string
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      billing: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          invoice_url: string | null
+          paid_at: string | null
+          payment_method: string | null
+          status: string
+          subscription_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          invoice_url?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          invoice_url?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          status?: string
+          subscription_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       collaboration_notifications: {
         Row: {
           actor_id: string | null
@@ -402,6 +530,50 @@ export type Database = {
           },
         ]
       }
+      project_stats: {
+        Row: {
+          avg_session_duration: number | null
+          created_at: string
+          id: string
+          last_viewed_at: string | null
+          project_id: string
+          unique_visitors: number
+          updated_at: string
+          user_id: string
+          views_count: number
+        }
+        Insert: {
+          avg_session_duration?: number | null
+          created_at?: string
+          id?: string
+          last_viewed_at?: string | null
+          project_id: string
+          unique_visitors?: number
+          updated_at?: string
+          user_id: string
+          views_count?: number
+        }
+        Update: {
+          avg_session_duration?: number | null
+          created_at?: string
+          id?: string
+          last_viewed_at?: string | null
+          project_id?: string
+          unique_visitors?: number
+          updated_at?: string
+          user_id?: string
+          views_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_stats_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: true
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       project_tags: {
         Row: {
           created_at: string
@@ -644,10 +816,12 @@ export type Database = {
       }
     }
     Functions: {
+      get_user_project_count: { Args: never; Returns: number }
       get_user_role: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["app_role"]
       }
+      get_user_stats_summary: { Args: never; Returns: Json }
       has_account_access: {
         Args: { _account_id: string; _user_id: string }
         Returns: boolean

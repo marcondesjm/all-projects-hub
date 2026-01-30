@@ -1,4 +1,4 @@
-import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye } from 'lucide-react';
+import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye, Archive } from 'lucide-react';
 import { Project, LovableAccount } from '@/types/project';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,9 @@ interface ProjectCardProps {
   project: Project;
   account?: LovableAccount;
   onToggleFavorite: (projectId: string) => void;
+  onEdit?: (projectId: string) => void;
+  onDelete?: (projectId: string) => void;
+  onArchive?: (projectId: string) => void;
 }
 
 const accountColorMap = {
@@ -32,8 +35,20 @@ const statusConfig = {
   archived: { label: 'Arquivado', className: 'bg-status-archived/10 text-status-archived border-status-archived/20' },
 };
 
-export function ProjectCard({ project, account, onToggleFavorite }: ProjectCardProps) {
+export function ProjectCard({ project, account, onToggleFavorite, onEdit, onDelete, onArchive }: ProjectCardProps) {
   const status = statusConfig[project.status];
+
+  const handleOpenProject = () => {
+    if (project.url) {
+      window.open(project.url, '_blank');
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (project.url) {
+      navigator.clipboard.writeText(project.url);
+    }
+  };
 
   return (
     <div className="group bg-card rounded-xl border border-border shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden hover-lift">
@@ -54,15 +69,17 @@ export function ProjectCard({ project, account, onToggleFavorite }: ProjectCardP
         {/* Overlay Actions */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-            <a
-              href={project.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-xs text-white/90 hover:text-white transition-colors"
-            >
-              <ExternalLink className="w-3.5 h-3.5" />
-              Abrir
-            </a>
+            {project.url ? (
+              <button
+                onClick={handleOpenProject}
+                className="flex items-center gap-1.5 text-xs text-white/90 hover:text-white transition-colors"
+              >
+                <ExternalLink className="w-3.5 h-3.5" />
+                Abrir
+              </button>
+            ) : (
+              <span className="text-xs text-white/60">Sem URL</span>
+            )}
             <Badge variant="secondary" className={cn('text-xs', status.className)}>
               {status.label}
             </Badge>
@@ -99,20 +116,31 @@ export function ProjectCard({ project, account, onToggleFavorite }: ProjectCardP
               <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem className="gap-2">
-                <ExternalLink className="w-4 h-4" />
-                Abrir Projeto
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2">
-                <Copy className="w-4 h-4" />
-                Copiar Link
-              </DropdownMenuItem>
-              <DropdownMenuItem className="gap-2">
+              {project.url && (
+                <>
+                  <DropdownMenuItem className="gap-2" onClick={handleOpenProject}>
+                    <ExternalLink className="w-4 h-4" />
+                    Abrir Projeto
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="gap-2" onClick={handleCopyLink}>
+                    <Copy className="w-4 h-4" />
+                    Copiar Link
+                  </DropdownMenuItem>
+                </>
+              )}
+              <DropdownMenuItem className="gap-2" onClick={() => onEdit?.(project.id)}>
                 <Edit className="w-4 h-4" />
                 Editar
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive">
+              <DropdownMenuItem className="gap-2" onClick={() => onArchive?.(project.id)}>
+                <Archive className="w-4 h-4" />
+                {project.status === 'archived' ? 'Restaurar' : 'Arquivar'}
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                className="gap-2 text-destructive focus:text-destructive"
+                onClick={() => onDelete?.(project.id)}
+              >
                 <Trash2 className="w-4 h-4" />
                 Excluir
               </DropdownMenuItem>
@@ -121,7 +149,7 @@ export function ProjectCard({ project, account, onToggleFavorite }: ProjectCardP
         </div>
 
         <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-          {project.description}
+          {project.description || 'Sem descrição'}
         </p>
 
         {/* Tags */}

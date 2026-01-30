@@ -1,4 +1,4 @@
-import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2 } from 'lucide-react';
+import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Archive } from 'lucide-react';
 import { Project, LovableAccount } from '@/types/project';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,9 @@ interface ProjectListProps {
   projects: Project[];
   accounts: LovableAccount[];
   onToggleFavorite: (projectId: string) => void;
+  onEdit?: (projectId: string) => void;
+  onDelete?: (projectId: string) => void;
+  onArchive?: (projectId: string) => void;
 }
 
 const accountColorMap = {
@@ -32,8 +35,16 @@ const statusConfig = {
   archived: { label: 'Arquivado', className: 'bg-status-archived/10 text-status-archived border-status-archived/20' },
 };
 
-export function ProjectList({ projects, accounts, onToggleFavorite }: ProjectListProps) {
-  const getAccount = (accountId: string) => accounts.find(a => a.id === accountId)!;
+export function ProjectList({ projects, accounts, onToggleFavorite, onEdit, onDelete, onArchive }: ProjectListProps) {
+  const getAccount = (accountId: string) => accounts.find(a => a.id === accountId);
+
+  const handleOpenProject = (url: string) => {
+    window.open(url, '_blank');
+  };
+
+  const handleCopyLink = (url: string) => {
+    navigator.clipboard.writeText(url);
+  };
 
   return (
     <div className="bg-card rounded-xl border border-border shadow-card overflow-hidden">
@@ -99,7 +110,9 @@ export function ProjectList({ projects, accounts, onToggleFavorite }: ProjectLis
                     </div>
                     <div>
                       <p className="font-medium text-card-foreground">{project.name}</p>
-                      <p className="text-sm text-muted-foreground line-clamp-1">{project.description}</p>
+                      <p className="text-sm text-muted-foreground line-clamp-1">
+                        {project.description || 'Sem descrição'}
+                      </p>
                     </div>
                   </div>
                 </td>
@@ -109,10 +122,14 @@ export function ProjectList({ projects, accounts, onToggleFavorite }: ProjectLis
                   </Badge>
                 </td>
                 <td className="py-3 px-4">
-                  <div className="flex items-center gap-2">
-                    <span className={cn('w-2 h-2 rounded-full', accountColorMap[account.color])} />
-                    <span className="text-sm">{account.name}</span>
-                  </div>
+                  {account ? (
+                    <div className="flex items-center gap-2">
+                      <span className={cn('w-2 h-2 rounded-full', accountColorMap[account.color])} />
+                      <span className="text-sm">{account.name}</span>
+                    </div>
+                  ) : (
+                    <span className="text-sm text-muted-foreground">—</span>
+                  )}
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex flex-wrap gap-1">
@@ -133,33 +150,56 @@ export function ProjectList({ projects, accounts, onToggleFavorite }: ProjectLis
                 </td>
                 <td className="py-3 px-4">
                   <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
+                    {project.url && (
+                      <button
+                        onClick={() => handleOpenProject(project.url)}
+                        className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground"
+                      >
+                        <ExternalLink className="w-4 h-4" />
+                      </button>
+                    )}
                     <DropdownMenu>
                       <DropdownMenuTrigger className="p-1.5 rounded-md hover:bg-muted transition-colors text-muted-foreground hover:text-foreground">
                         <MoreHorizontal className="w-4 h-4" />
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem className="gap-2">
-                          <ExternalLink className="w-4 h-4" />
-                          Abrir Projeto
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2">
-                          <Copy className="w-4 h-4" />
-                          Copiar Link
-                        </DropdownMenuItem>
-                        <DropdownMenuItem className="gap-2">
+                        {project.url && (
+                          <>
+                            <DropdownMenuItem 
+                              className="gap-2" 
+                              onClick={() => handleOpenProject(project.url)}
+                            >
+                              <ExternalLink className="w-4 h-4" />
+                              Abrir Projeto
+                            </DropdownMenuItem>
+                            <DropdownMenuItem 
+                              className="gap-2"
+                              onClick={() => handleCopyLink(project.url)}
+                            >
+                              <Copy className="w-4 h-4" />
+                              Copiar Link
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                        <DropdownMenuItem 
+                          className="gap-2"
+                          onClick={() => onEdit?.(project.id)}
+                        >
                           <Edit className="w-4 h-4" />
                           Editar
                         </DropdownMenuItem>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="gap-2 text-destructive focus:text-destructive">
+                        <DropdownMenuItem 
+                          className="gap-2"
+                          onClick={() => onArchive?.(project.id)}
+                        >
+                          <Archive className="w-4 h-4" />
+                          {project.status === 'archived' ? 'Restaurar' : 'Arquivar'}
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="gap-2 text-destructive focus:text-destructive"
+                          onClick={() => onDelete?.(project.id)}
+                        >
                           <Trash2 className="w-4 h-4" />
                           Excluir
                         </DropdownMenuItem>

@@ -15,6 +15,8 @@ import {
   Coins,
   Pencil,
   Shield,
+  MessageCircle,
+  Clock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -253,6 +255,25 @@ export function Sidebar({
             </p>
           </div>
         )}
+        
+        {/* WhatsApp Support Button */}
+        <a
+          href="https://wa.me/5548996029392?text=Olá! Preciso de suporte com o ProjectHub."
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Abrir suporte via WhatsApp"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar group"
+        >
+          <MessageCircle className="w-4 h-4" aria-hidden="true" />
+          <div className="flex flex-col items-start">
+            <span>Suporte</span>
+            <span className="text-[10px] text-muted-foreground group-hover:text-emerald-600/70 flex items-center gap-1">
+              <Clock className="w-2.5 h-2.5" />
+              Seg-Sex 8h às 18h
+            </span>
+          </div>
+        </a>
+
         {isAdmin && (
           <button 
             onClick={() => navigate('/admin')}

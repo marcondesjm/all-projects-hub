@@ -11,7 +11,8 @@ import {
   Tag,
   LogOut,
   Loader2,
-  Coins
+  Coins,
+  Pencil
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ interface SidebarProps {
   accounts: LovableAccount[];
   isLoading?: boolean;
   onAddAccount?: () => void;
+  onEditAccount?: (account: LovableAccount) => void;
 }
 
 const accountColorMap: Record<string, string> = {
@@ -48,7 +50,8 @@ export function Sidebar({
   onAccountChange,
   accounts,
   isLoading,
-  onAddAccount
+  onAddAccount,
+  onEditAccount
 }: SidebarProps) {
   const [accountsOpen, setAccountsOpen] = useState(true);
   const { signOut, user } = useAuth();
@@ -132,26 +135,40 @@ export function Sidebar({
                   const isActive = selectedAccount === account.id;
                   
                   return (
-                    <button
+                    <div
                       key={account.id}
-                      onClick={() => {
-                        onAccountChange(account.id);
-                        onViewChange('all');
-                      }}
                       className={cn(
-                        'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200',
+                        'group w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all duration-200',
                         isActive
                           ? 'bg-sidebar-accent text-sidebar-accent-foreground'
                           : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
                       )}
                     >
-                      <span className={cn('w-2.5 h-2.5 rounded-full flex-shrink-0', accountColorMap[account.color] || 'bg-muted')} />
-                      <span className="flex-1 text-left truncate">{account.name}</span>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Coins className="w-3 h-3" />
-                        {account.credits}
-                      </span>
-                    </button>
+                      <button
+                        onClick={() => {
+                          onAccountChange(account.id);
+                          onViewChange('all');
+                        }}
+                        className="flex-1 flex items-center gap-3 text-left"
+                      >
+                        <span className={cn('w-2.5 h-2.5 rounded-full flex-shrink-0', accountColorMap[account.color] || 'bg-muted')} />
+                        <span className="flex-1 truncate">{account.name}</span>
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Coins className="w-3 h-3" />
+                          {account.credits ?? 0}
+                        </span>
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEditAccount?.(account);
+                        }}
+                        className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-sidebar-accent transition-all"
+                        title="Editar conta"
+                      >
+                        <Pencil className="w-3 h-3 text-muted-foreground" />
+                      </button>
+                    </div>
                   );
                 })
               )}

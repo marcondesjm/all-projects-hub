@@ -6,6 +6,7 @@ import { FilterBar } from '@/components/projects/FilterBar';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectList } from '@/components/projects/ProjectList';
 import { AddAccountModal } from '@/components/accounts/AddAccountModal';
+import { EditAccountModal } from '@/components/accounts/EditAccountModal';
 import { AddProjectModal } from '@/components/projects/AddProjectModal';
 import { EditProjectModal } from '@/components/projects/EditProjectModal';
 import { TagsManager } from '@/components/tags/TagsManager';
@@ -35,6 +36,8 @@ export default function Dashboard() {
 
   // Modal states
   const [addAccountOpen, setAddAccountOpen] = useState(false);
+  const [editAccountOpen, setEditAccountOpen] = useState(false);
+  const [editingAccount, setEditingAccount] = useState<LovableAccount | null>(null);
   const [addProjectOpen, setAddProjectOpen] = useState(false);
   const [tagsManagerOpen, setTagsManagerOpen] = useState(false);
   const [editProjectOpen, setEditProjectOpen] = useState(false);
@@ -234,6 +237,10 @@ export default function Dashboard() {
         accounts={accounts}
         isLoading={accountsLoading}
         onAddAccount={() => setAddAccountOpen(true)}
+        onEditAccount={(account) => {
+          setEditingAccount(account);
+          setEditAccountOpen(true);
+        }}
       />
       
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -335,6 +342,12 @@ export default function Dashboard() {
       <AddAccountModal 
         open={addAccountOpen} 
         onOpenChange={setAddAccountOpen} 
+      />
+
+      <EditAccountModal
+        open={editAccountOpen}
+        onOpenChange={setEditAccountOpen}
+        account={editingAccount}
       />
       
       <AddProjectModal 

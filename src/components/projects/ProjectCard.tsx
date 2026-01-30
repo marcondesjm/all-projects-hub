@@ -15,10 +15,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ProjectHoverCard } from './ProjectHoverCard';
+import { ProjectCardOnlineUsers } from './ProjectCardOnlineUsers';
+import { ProjectUserPresence } from '@/hooks/useProjectPresence';
 
 interface ProjectCardProps {
   project: Project;
   account?: LovableAccount;
+  onlineUsers?: ProjectUserPresence[];
   onToggleFavorite: (projectId: string) => void;
   onEdit?: (projectId: string) => void;
   onDelete?: (projectId: string) => void;
@@ -39,7 +42,7 @@ const statusConfig = {
   archived: { label: 'Arquivado', className: 'bg-status-archived/10 text-status-archived border-status-archived/20' },
 };
 
-export function ProjectCard({ project, account, onToggleFavorite, onEdit, onDelete, onArchive }: ProjectCardProps) {
+export function ProjectCard({ project, account, onlineUsers = [], onToggleFavorite, onEdit, onDelete, onArchive }: ProjectCardProps) {
   const status = statusConfig[project.status];
   
   // Check if project is overdue
@@ -132,6 +135,13 @@ export function ProjectCard({ project, account, onToggleFavorite, onEdit, onDele
         {account && (
           <div className="absolute top-3 left-3 flex items-center gap-2">
             <span className={cn('w-2.5 h-2.5 rounded-full ring-2 ring-white/50', accountColorMap[account.color])} />
+          </div>
+        )}
+
+        {/* Online Users Indicator */}
+        {onlineUsers.length > 0 && (
+          <div className="absolute bottom-3 right-3 z-10">
+            <ProjectCardOnlineUsers users={onlineUsers} />
           </div>
         )}
       </div>

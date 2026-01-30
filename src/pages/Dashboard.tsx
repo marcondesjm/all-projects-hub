@@ -25,6 +25,7 @@ import { useAccounts, useProjects, useTags, useToggleFavorite, useUpdateProject,
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useSeedDemoData } from '@/hooks/useSeedDemoData';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useProjectPresence } from '@/hooks/useProjectPresence';
 import { ProjectStatus, ProjectType } from '@/types/project';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -90,6 +91,10 @@ export default function Dashboard() {
 
   const { seedDemoData } = useSeedDemoData();
   const [demoSeeded, setDemoSeeded] = useState(false);
+
+  // Project presence for online users
+  const projectIds = useMemo(() => projects.map(p => p.id), [projects]);
+  const { getProjectOnlineUsers } = useProjectPresence(projectIds);
 
   // Seed demo data for new users
   useEffect(() => {
@@ -428,6 +433,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
               {transformedProjects.map((project, index) => {
                 const account = getAccount(project.accountId);
+                const onlineUsers = getProjectOnlineUsers(project.id);
                 return (
                   <div
                     key={project.id}
@@ -437,6 +443,7 @@ export default function Dashboard() {
                     <ProjectCard
                       project={project}
                       account={account}
+                      onlineUsers={onlineUsers}
                       onToggleFavorite={handleToggleFavorite}
                       onEdit={handleEditProject}
                       onDelete={handleDeleteProject}

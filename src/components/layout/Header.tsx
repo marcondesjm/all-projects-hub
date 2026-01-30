@@ -1,4 +1,4 @@
-import { Search, Grid3X3, List, Plus } from 'lucide-react';
+import { Search, Grid3X3, List, Plus, Users } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { NotificationCenter, Notification } from '@/components/notifications/NotificationCenter';
 import { CollaborationNotifications } from '@/components/collaboration/CollaborationNotifications';
 import { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   searchQuery: string;
@@ -37,6 +38,7 @@ export function Header({
   onDeleteNotification = () => {},
   onClearNotifications = () => {},
 }: HeaderProps) {
+  const navigate = useNavigate();
   return (
     <header className="h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between border-b border-border bg-card/50 backdrop-blur-sm gap-2 sm:gap-4">
       {/* Mobile Menu */}
@@ -120,6 +122,23 @@ export function Header({
 
         {/* Theme Toggle */}
         <ThemeToggle />
+
+        {/* Collaborations Page Link */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate('/collaborations')}
+              className="text-muted-foreground hover:text-foreground"
+            >
+              <Users className="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Gerenciar colaborações</p>
+          </TooltipContent>
+        </Tooltip>
 
         {/* Collaboration Notifications */}
         <CollaborationNotifications />

@@ -1,4 +1,4 @@
-import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye, Archive, Coins, AlertTriangle } from 'lucide-react';
+import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye, Archive, Coins, AlertTriangle, Calendar, History } from 'lucide-react';
 import { Project } from '@/types/project';
 import { LovableAccount } from '@/hooks/useProjects';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ProjectHoverCard } from './ProjectHoverCard';
@@ -26,6 +26,8 @@ interface ProjectCardProps {
   onEdit?: (projectId: string) => void;
   onDelete?: (projectId: string) => void;
   onArchive?: (projectId: string) => void;
+  onDeadlineChange?: (projectId: string, deadline: Date | null) => void;
+  onShowHistory?: (projectId: string) => void;
 }
 
 const accountColorMap = {
@@ -42,7 +44,7 @@ const statusConfig = {
   archived: { label: 'Arquivado', className: 'bg-status-archived/10 text-status-archived border-status-archived/20' },
 };
 
-export function ProjectCard({ project, account, onlineUsers = [], onToggleFavorite, onEdit, onDelete, onArchive }: ProjectCardProps) {
+export function ProjectCard({ project, account, onlineUsers = [], onToggleFavorite, onEdit, onDelete, onArchive, onDeadlineChange, onShowHistory }: ProjectCardProps) {
   const status = statusConfig[project.status];
   
   // Check if project is overdue
@@ -171,6 +173,10 @@ export function ProjectCard({ project, account, onlineUsers = [], onToggleFavori
                 <Edit className="w-4 h-4" />
                 Editar
               </DropdownMenuItem>
+              <DropdownMenuItem className="gap-2" onClick={() => onShowHistory?.(project.id)}>
+                <History className="w-4 h-4" />
+                Ver Histórico
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem className="gap-2" onClick={() => onArchive?.(project.id)}>
                 <Archive className="w-4 h-4" />
@@ -224,6 +230,19 @@ export function ProjectCard({ project, account, onlineUsers = [], onToggleFavori
                 <p>{project.progress}% concluído</p>
               </TooltipContent>
             </Tooltip>
+          </div>
+        )}
+
+        {/* Deadline indicator */}
+        {project.deadline && (
+          <div className={cn(
+            "flex items-center gap-1.5 text-xs mb-3 p-2 rounded-md",
+            isOverdue 
+              ? "bg-destructive/10 text-destructive" 
+              : "bg-muted text-muted-foreground"
+          )}>
+            <Calendar className="w-3.5 h-3.5" />
+            <span>Prazo: {format(new Date(project.deadline), "dd/MM/yyyy", { locale: ptBR })}</span>
           </div>
         )}
 

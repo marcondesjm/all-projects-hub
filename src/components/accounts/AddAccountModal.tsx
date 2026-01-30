@@ -13,8 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateAccount } from '@/hooks/useProjects';
+import { useNewAccountKeys, saveAccountLocalKeys } from '@/hooks/useLocalKeys';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Coins, Key, Globe, User, Mail, FileText } from 'lucide-react';
+import { Loader2, Coins, Key, Globe, User, Mail, FileText, HardDrive } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Accordion,
@@ -22,6 +23,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
 
 interface AddAccountModalProps {
   open: boolean;
@@ -74,7 +76,8 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
     }
 
     try {
-      await createAccount.mutateAsync({
+      // Criar conta no banco SEM as keys (elas vão para localStorage)
+      const newAccount = await createAccount.mutateAsync({
         name: name.trim(),
         email: email.trim(),
         admin_email: adminEmail.trim() || null,
@@ -82,14 +85,22 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
         credits: creditsValue,
         supabase_project_id: supabaseProjectId.trim() || null,
         supabase_url: supabaseUrl.trim() || null,
-        anon_key: anonKey.trim() || null,
-        service_role_key: serviceRoleKey.trim() || null,
+        anon_key: null, // Não enviar para o banco
+        service_role_key: null, // Não enviar para o banco
         notes: notes.trim() || null,
       });
+
+      // Salvar keys localmente se fornecidas
+      if (newAccount && (anonKey.trim() || serviceRoleKey.trim())) {
+        saveAccountLocalKeys(newAccount.id, {
+          anon_key: anonKey.trim() || undefined,
+          service_role_key: serviceRoleKey.trim() || undefined,
+        });
+      }
       
       toast({
         title: 'Conta adicionada!',
-        description: `A conta "${name}" foi adicionada com sucesso.`,
+        description: `A conta "${name}" foi adicionada com sucesso.${anonKey || serviceRoleKey ? ' As API Keys foram salvas localmente.' : ''}`,
       });
       
       // Reset form
@@ -245,9 +256,24 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
                     <span className="flex items-center gap-2">
                       <Key className="w-4 h-4 text-primary" />
                       API Keys (opcional)
+                      <Badge variant="outline" className="ml-2 text-xs gap-1">
+                        <HardDrive className="w-3 h-3" />
+                        Local
+                      </Badge>
                     </span>
                   </AccordionTrigger>
                   <AccordionContent className="space-y-4 pb-4">
+                    <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                      <p className="text-xs text-muted-foreground flex items-start gap-2">
+                        <HardDrive className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                        <span>
+                          <strong>Armazenamento Local:</strong> As API Keys são salvas apenas no seu navegador 
+                          (localStorage) e nunca são enviadas para o servidor. Elas ficarão disponíveis 
+                          apenas neste dispositivo.
+                        </span>
+                      </p>
+                    </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="anon-key">Anon Key (Pública)</Label>
                       <Input

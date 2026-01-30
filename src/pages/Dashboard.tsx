@@ -402,13 +402,15 @@ export default function Dashboard() {
           <CollaboratedProjectsSection onEditProject={handleEditProject} />
 
           {/* Title */}
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-foreground">{getViewTitle()}</h2>
-            <div className="flex items-center gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-4 mb-4">
+            <h2 className="text-lg sm:text-xl font-semibold text-foreground truncate">{getViewTitle()}</h2>
+            <div className="flex items-center gap-2 flex-wrap">
               <RefreshButton />
-              <ImportBackupButton />
-              <ExportBackupButton />
-              <span className="text-sm text-muted-foreground">
+              <div className="hidden sm:flex items-center gap-2">
+                <ImportBackupButton />
+                <ExportBackupButton />
+              </div>
+              <span className="text-xs sm:text-sm text-muted-foreground whitespace-nowrap">
                 {filteredProjects.length} projeto{filteredProjects.length !== 1 ? 's' : ''}
               </span>
             </div>

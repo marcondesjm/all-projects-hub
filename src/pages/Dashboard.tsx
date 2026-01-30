@@ -23,6 +23,7 @@ import { ExportBackupButton } from '@/components/export/ExportBackupButton';
 import { ImportBackupButton } from '@/components/export/ImportBackupButton';
 import { useAccounts, useProjects, useTags, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useSeedDemoData } from '@/hooks/useSeedDemoData';
 import { useNotifications } from '@/hooks/useNotifications';
 import { ProjectStatus, ProjectType } from '@/types/project';
 import { Loader2 } from 'lucide-react';
@@ -86,6 +87,18 @@ export default function Dashboard() {
     completeOnboarding,
     showTour,
   } = useOnboarding();
+
+  const { seedDemoData } = useSeedDemoData();
+  const [demoSeeded, setDemoSeeded] = useState(false);
+
+  // Seed demo data for new users
+  useEffect(() => {
+    if (showTour && !demoSeeded && !accountsLoading && accounts.length === 0) {
+      seedDemoData().then((seeded) => {
+        if (seeded) setDemoSeeded(true);
+      });
+    }
+  }, [showTour, demoSeeded, accountsLoading, accounts.length, seedDemoData]);
 
   // Global search keyboard shortcut (Ctrl+K / Cmd+K)
   useEffect(() => {

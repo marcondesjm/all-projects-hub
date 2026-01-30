@@ -13,7 +13,7 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-
+import { ProjectHoverCard } from './ProjectHoverCard';
 interface ProjectCardProps {
   project: Project;
   account?: LovableAccount;
@@ -53,6 +53,7 @@ export function ProjectCard({ project, account, onToggleFavorite, onEdit, onDele
   };
 
   return (
+    <ProjectHoverCard project={project} account={account}>
     <div className="group bg-card rounded-xl border border-border shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden hover-lift">
       {/* Screenshot */}
       <div className="relative aspect-video bg-muted overflow-hidden">
@@ -199,5 +200,6 @@ export function ProjectCard({ project, account, onToggleFavorite, onEdit, onDele
         </div>
       </div>
     </div>
+    </ProjectHoverCard>
   );
 }

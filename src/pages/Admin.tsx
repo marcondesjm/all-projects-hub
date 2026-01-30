@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAdminUsers, useAdminStats, AdminUser } from '@/hooks/useAdmin';
 import { useUserRole, useIsAdmin } from '@/hooks/useRoles';
 import { useUpgradeSubscription, SubscriptionPlan } from '@/hooks/useSubscription';
+import { usePendingReceipts, useVerifyPayment } from '@/hooks/usePayments';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -10,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table,
   TableBody,
@@ -45,8 +47,14 @@ import {
   Crown,
   Shield,
   User,
+  Receipt,
+  ExternalLink,
+  Check,
+  X,
+  Loader2,
+  Clock,
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 
@@ -73,6 +81,8 @@ export default function Admin() {
   const { toast } = useToast();
   const isAdmin = useIsAdmin();
   const { data: users = [], isLoading, refetch } = useAdminUsers();
+  const { data: pendingReceipts = [], isLoading: receiptsLoading } = usePendingReceipts();
+  const verifyPayment = useVerifyPayment();
   const stats = useAdminStats();
   const upgradeSubscription = useUpgradeSubscription();
   
@@ -81,6 +91,7 @@ export default function Admin() {
   const [changePlanDialogOpen, setChangePlanDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [newPlan, setNewPlan] = useState<SubscriptionPlan>('free');
+  const [verifyingId, setVerifyingId] = useState<string | null>(null);
 
   // Filter users
   const filteredUsers = users.filter(user => {
@@ -122,6 +133,26 @@ export default function Admin() {
     }
   };
 
+  const handleVerifyPayment = async (receiptId: string, userId: string, approved: boolean) => {
+    setVerifyingId(receiptId);
+    try {
+      await verifyPayment.mutateAsync({ receiptId, userId, approved });
+      toast({
+        title: approved ? 'Pagamento aprovado!' : 'Pagamento rejeitado',
+        description: approved 
+          ? 'A assinatura foi ativada com sucesso.' 
+          : 'O comprovante foi rejeitado.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível processar.',
+        variant: 'destructive',
+      });
+    } finally {
+      setVerifyingId(null);
+    }
+  };
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -171,6 +202,24 @@ export default function Admin() {
       </header>
 
       <main className="container mx-auto px-4 py-6 space-y-6">
+        {/* Pending Receipts Alert */}
+        {pendingReceipts.length > 0 && (
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-4 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Receipt className="w-5 h-5 text-amber-600" />
+              <div>
+                <p className="font-medium text-amber-700 dark:text-amber-400">
+                  {pendingReceipts.length} comprovante{pendingReceipts.length !== 1 ? 's' : ''} aguardando verificação
+                </p>
+                <p className="text-sm text-amber-600/80">
+                  Verifique os pagamentos pendentes abaixo.
+                </p>
+              </div>
+            </div>
+            <Badge className="bg-amber-500 text-white">{pendingReceipts.length}</Badge>
+          </div>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <Card>
@@ -269,6 +318,25 @@ export default function Admin() {
           </Card>
         </div>
 
+        {/* Tabs for Users and Payments */}
+        <Tabs defaultValue="users" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="users" className="gap-2">
+              <Users className="w-4 h-4" />
+              Usuários
+            </TabsTrigger>
+            <TabsTrigger value="payments" className="gap-2">
+              <Receipt className="w-4 h-4" />
+              Comprovantes
+              {pendingReceipts.length > 0 && (
+                <Badge variant="destructive" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-xs">
+                  {pendingReceipts.length}
+                </Badge>
+              )}
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="users">
         {/* Users Table */}
         <Card>
           <CardHeader>
@@ -399,6 +467,127 @@ export default function Admin() {
             )}
           </CardContent>
         </Card>
+          </TabsContent>
+
+          <TabsContent value="payments">
+            {/* Payment Receipts */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Receipt className="w-5 h-5" />
+                  Comprovantes de Pagamento
+                </CardTitle>
+                <CardDescription>
+                  Verifique e aprove os comprovantes enviados pelos usuários
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                {receiptsLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-20 w-full" />
+                    ))}
+                  </div>
+                ) : pendingReceipts.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Check className="w-10 h-10 text-emerald-500 mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      Nenhum comprovante pendente de verificação
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {pendingReceipts.map((receipt) => (
+                      <div 
+                        key={receipt.id}
+                        className="border rounded-lg p-4 space-y-3"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                              <CreditCard className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-medium">
+                                {receipt.user_name || receipt.user_email || 'Usuário'}
+                              </p>
+                              <p className="text-sm text-muted-foreground">
+                                {receipt.user_email}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-bold text-lg">
+                              R$ {receipt.amount.toFixed(2).replace('.', ',')}
+                            </p>
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="w-3 h-3" />
+                              {formatDistanceToNow(new Date(receipt.created_at), { 
+                                addSuffix: true, 
+                                locale: ptBR 
+                              })}
+                            </div>
+                          </div>
+                        </div>
+
+                        {receipt.notes && (
+                          <p className="text-sm text-muted-foreground bg-muted/50 rounded p-2">
+                            {receipt.notes}
+                          </p>
+                        )}
+
+                        <div className="flex items-center justify-between pt-2 border-t">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(receipt.receipt_url, '_blank')}
+                          >
+                            <ExternalLink className="w-4 h-4 mr-2" />
+                            Ver Comprovante
+                          </Button>
+
+                          <div className="flex items-center gap-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleVerifyPayment(receipt.id, receipt.user_id, false)}
+                              disabled={verifyingId === receipt.id}
+                              className="text-destructive hover:text-destructive"
+                            >
+                              {verifyingId === receipt.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <X className="w-4 h-4 mr-1" />
+                                  Rejeitar
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              size="sm"
+                              onClick={() => handleVerifyPayment(receipt.id, receipt.user_id, true)}
+                              disabled={verifyingId === receipt.id}
+                              className="bg-emerald-600 hover:bg-emerald-700"
+                            >
+                              {verifyingId === receipt.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <>
+                                  <Check className="w-4 h-4 mr-1" />
+                                  Aprovar
+                                </>
+                              )}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Change Plan Dialog */}

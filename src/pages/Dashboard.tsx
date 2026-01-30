@@ -17,6 +17,9 @@ import { SettingsModal } from '@/components/settings/SettingsModal';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { GlobalSearch } from '@/components/search/GlobalSearch';
+import { TrialBanner } from '@/components/subscription/TrialBanner';
+import { TrialExpiredModal } from '@/components/subscription/TrialExpiredModal';
+import { ExportBackupButton } from '@/components/export/ExportBackupButton';
 import { useAccounts, useProjects, useTags, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -320,11 +323,18 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="flex h-screen bg-background">
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <Sidebar {...sidebarProps} />
-      </div>
+    <div className="flex flex-col h-screen bg-background">
+      {/* Trial Banner */}
+      <TrialBanner />
+      
+      {/* Trial Expired Modal */}
+      <TrialExpiredModal />
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* Desktop Sidebar */}
+        <div className="hidden lg:block">
+          <Sidebar {...sidebarProps} />
+        </div>
       
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <Header
@@ -352,9 +362,12 @@ export default function Dashboard() {
           {/* Title */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-foreground">{getViewTitle()}</h2>
-            <span className="text-sm text-muted-foreground">
-              {filteredProjects.length} projeto{filteredProjects.length !== 1 ? 's' : ''}
-            </span>
+            <div className="flex items-center gap-2">
+              <ExportBackupButton />
+              <span className="text-sm text-muted-foreground">
+                {filteredProjects.length} projeto{filteredProjects.length !== 1 ? 's' : ''}
+              </span>
+            </div>
           </div>
 
           {/* Filters */}
@@ -523,6 +536,7 @@ export default function Dashboard() {
           onDismiss={completeOnboarding}
         />
       )}
+      </div>
     </div>
   );
 }

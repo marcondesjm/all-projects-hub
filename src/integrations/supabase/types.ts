@@ -478,6 +478,7 @@ export type Database = {
           trial_started_at: string | null
           updated_at: string
           user_id: string
+          user_status: string
         }
         Insert: {
           created_at?: string
@@ -497,6 +498,7 @@ export type Database = {
           trial_started_at?: string | null
           updated_at?: string
           user_id: string
+          user_status?: string
         }
         Update: {
           created_at?: string
@@ -516,6 +518,7 @@ export type Database = {
           trial_started_at?: string | null
           updated_at?: string
           user_id?: string
+          user_status?: string
         }
         Relationships: []
       }
@@ -577,6 +580,7 @@ export type Database = {
           email: string | null
           full_name: string | null
           id: string | null
+          is_trial: boolean | null
           max_accounts: number | null
           max_projects: number | null
           onboarding_completed: boolean | null
@@ -585,7 +589,9 @@ export type Database = {
           role: Database["public"]["Enums"]["app_role"] | null
           subscription_expires_at: string | null
           subscription_started_at: string | null
+          trial_ends_at: string | null
           user_id: string | null
+          user_status: string | null
         }
         Relationships: []
       }

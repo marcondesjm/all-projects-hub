@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { MobileSidebar } from '@/components/layout/MobileSidebar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
@@ -16,6 +16,7 @@ import { TagsManager } from '@/components/tags/TagsManager';
 import { SettingsModal } from '@/components/settings/SettingsModal';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
+import { GlobalSearch } from '@/components/search/GlobalSearch';
 import { useAccounts, useProjects, useTags, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { ProjectStatus, ProjectType } from '@/types/project';
@@ -52,6 +53,7 @@ export default function Dashboard() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
 
   const { data: accounts = [], isLoading: accountsLoading } = useAccounts();
   const { data: projects = [], isLoading: projectsLoading } = useProjects();
@@ -70,6 +72,38 @@ export default function Dashboard() {
     completeOnboarding,
     showTour,
   } = useOnboarding();
+
+  // Global search keyboard shortcut (Ctrl+K / Cmd+K)
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setGlobalSearchOpen(true);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  // Handle global search selection
+  const handleSelectProject = useCallback((projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setEditingProject(project);
+      setEditProjectOpen(true);
+    }
+  }, [projects]);
+
+  const handleSelectAccount = useCallback((accountId: string) => {
+    setSelectedAccount(accountId);
+    setActiveView('all');
+  }, []);
+
+  const handleSelectTag = useCallback((tagName: string) => {
+    setTagFilter(tagName);
+    setActiveView('all');
+  }, []);
 
   // Update onboarding checklist when accounts/projects change
   useEffect(() => {
@@ -289,6 +323,7 @@ export default function Dashboard() {
           onViewModeChange={setViewMode}
           onNewProject={() => setAddProjectOpen(true)}
           mobileMenuTrigger={<MobileSidebar {...sidebarProps} />}
+          onOpenSearch={() => setGlobalSearchOpen(true)}
         />
         
         <main className="flex-1 overflow-y-auto p-3 sm:p-6 pb-20 lg:pb-6 scrollbar-thin">
@@ -412,6 +447,15 @@ export default function Dashboard() {
       <SettingsModal
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
+      />
+
+      {/* Global Search */}
+      <GlobalSearch
+        open={globalSearchOpen}
+        onOpenChange={setGlobalSearchOpen}
+        onSelectProject={handleSelectProject}
+        onSelectAccount={handleSelectAccount}
+        onSelectTag={handleSelectTag}
       />
 
       {/* Delete Confirmation Dialog */}

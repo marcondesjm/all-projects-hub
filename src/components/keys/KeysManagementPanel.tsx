@@ -201,28 +201,28 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-shrink-0 px-6 pb-4">
-            <Alert className="bg-amber-500/10 border-amber-500/30">
-              <AlertTriangle className="h-4 w-4 text-amber-500" />
-              <AlertDescription className="text-xs">
-                <strong>⚠️ Armazenamento Local:</strong> Todas as keys são salvas apenas neste navegador. 
-                Use o backup para transferir para outros dispositivos.
-              </AlertDescription>
-            </Alert>
-          </div>
-
-          <div className="flex-shrink-0 px-6 pb-4 flex justify-between items-center border-b">
-            <div className="flex items-center gap-2">
-              <Badge variant="secondary" className="gap-1">
-                <HardDrive className="w-3 h-3" />
-                {accountsWithKeys.length} conta(s) com keys
-              </Badge>
+          <ScrollArea className="flex-1 min-h-0">
+            <div className="px-6 pb-4">
+              <Alert className="bg-amber-500/10 border-amber-500/30">
+                <AlertTriangle className="h-4 w-4 text-amber-500" />
+                <AlertDescription className="text-xs">
+                  <strong>⚠️ Armazenamento Local:</strong> Todas as keys são salvas apenas neste navegador. 
+                  Use o backup para transferir para outros dispositivos.
+                </AlertDescription>
+              </Alert>
             </div>
-            <KeysBackupButtons onImportSuccess={refreshKeys} />
-          </div>
 
-          <ScrollArea className="flex-1 px-6 max-h-[calc(85vh-280px)]">
-            <div className="py-4 space-y-4">
+            <div className="px-6 pb-4 flex justify-between items-center border-b">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="gap-1">
+                  <HardDrive className="w-3 h-3" />
+                  {accountsWithKeys.length} conta(s) com keys
+                </Badge>
+              </div>
+              <KeysBackupButtons onImportSuccess={refreshKeys} />
+            </div>
+
+            <div className="py-4 px-6 space-y-4">
               {accountsWithKeys.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Key className="w-12 h-12 mx-auto mb-4 opacity-30" />

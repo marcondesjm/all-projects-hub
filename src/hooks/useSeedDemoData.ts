@@ -73,6 +73,7 @@ const demoTags = [
 export function useSeedDemoData() {
   const { user } = useAuth();
   const [seeding, setSeeding] = useState(false);
+  const [clearing, setClearing] = useState(false);
 
   const seedDemoData = useCallback(async () => {
     if (!user?.id) return false;
@@ -163,8 +164,70 @@ export function useSeedDemoData() {
     }
   }, [user?.id]);
 
+  const clearDemoData = useCallback(async () => {
+    if (!user?.id) return false;
+    
+    setClearing(true);
+    
+    try {
+      // Find demo account
+      const { data: demoAccountData } = await supabase
+        .from('lovable_accounts')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('name', 'Conta Demonstração')
+        .maybeSingle();
+
+      if (demoAccountData) {
+        // Delete projects from demo account
+        await supabase
+          .from('projects')
+          .delete()
+          .eq('account_id', demoAccountData.id);
+
+        // Delete the demo account
+        await supabase
+          .from('lovable_accounts')
+          .delete()
+          .eq('id', demoAccountData.id);
+      }
+
+      // Delete demo tags
+      const demoTagNames = demoTags.map(t => t.name);
+      await supabase
+        .from('tags')
+        .delete()
+        .eq('user_id', user.id)
+        .in('name', demoTagNames);
+
+      console.log('Demo data cleared successfully');
+      setClearing(false);
+      return true;
+    } catch (error) {
+      console.error('Error clearing demo data:', error);
+      setClearing(false);
+      return false;
+    }
+  }, [user?.id]);
+
+  const hasDemoAccount = useCallback(async () => {
+    if (!user?.id) return false;
+    
+    const { data } = await supabase
+      .from('lovable_accounts')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('name', 'Conta Demonstração')
+      .maybeSingle();
+    
+    return !!data;
+  }, [user?.id]);
+
   return {
     seedDemoData,
+    clearDemoData,
+    hasDemoAccount,
     seeding,
+    clearing,
   };
 }

@@ -190,7 +190,7 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
   return (
     <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] flex flex-col p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-2xl h-[85vh] flex flex-col p-0 overflow-hidden">
           <DialogHeader className="flex-shrink-0 p-6 pb-4">
             <DialogTitle className="flex items-center gap-2">
               <Shield className="w-5 h-5 text-primary" />
@@ -201,8 +201,8 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
             </DialogDescription>
           </DialogHeader>
 
-          <ScrollArea className="flex-1 min-h-0">
-            <div className="px-6 pb-4">
+          <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+            <div className="flex-shrink-0 px-6 pb-4">
               <Alert className="bg-amber-500/10 border-amber-500/30">
                 <AlertTriangle className="h-4 w-4 text-amber-500" />
                 <AlertDescription className="text-xs">
@@ -212,7 +212,7 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
               </Alert>
             </div>
 
-            <div className="px-6 pb-4 flex justify-between items-center border-b">
+            <div className="flex-shrink-0 px-6 pb-4 flex justify-between items-center border-b">
               <div className="flex items-center gap-2">
                 <Badge variant="secondary" className="gap-1">
                   <HardDrive className="w-3 h-3" />
@@ -222,6 +222,7 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
               <KeysBackupButtons onImportSuccess={refreshKeys} />
             </div>
 
+            <ScrollArea className="flex-1 min-h-0">
             <div className="py-4 px-6 space-y-4">
               {accountsWithKeys.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
@@ -534,6 +535,7 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
               )}
             </div>
           </ScrollArea>
+          </div>
         </DialogContent>
       </Dialog>
 

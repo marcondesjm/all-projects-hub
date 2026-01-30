@@ -4,10 +4,10 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, FolderKanban } from 'lucide-react';
+import { Loader2, FolderKanban, Play, Sparkles } from 'lucide-react';
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -67,6 +67,10 @@ export default function Auth() {
     setIsLoading(false);
   };
 
+  const handleDemo = () => {
+    navigate('/demo');
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <div className="w-full max-w-md space-y-6">
@@ -79,6 +83,28 @@ export default function Auth() {
           <p className="text-sm text-muted-foreground text-center">
             Organize todos os seus projetos Lovable em um só lugar
           </p>
+        </div>
+
+        {/* Demo Button */}
+        <Button 
+          variant="outline" 
+          className="w-full gap-2 h-12 border-primary/30 hover:bg-primary/5 hover:border-primary transition-all"
+          onClick={handleDemo}
+        >
+          <Play className="w-4 h-4 text-primary" />
+          <span>Ver Demonstração</span>
+          <Sparkles className="w-4 h-4 text-primary" />
+        </Button>
+
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <span className="w-full border-t border-border" />
+          </div>
+          <div className="relative flex justify-center text-xs uppercase">
+            <span className="bg-background px-2 text-muted-foreground">
+              ou entre na sua conta
+            </span>
+          </div>
         </div>
 
         <Card className="border-border/50 shadow-lg">
@@ -181,6 +207,11 @@ export default function Auth() {
             </CardContent>
           </Tabs>
         </Card>
+
+        {/* Trial info */}
+        <p className="text-xs text-center text-muted-foreground">
+          ✨ <strong>15 dias grátis</strong> com acesso a todos os recursos
+        </p>
       </div>
     </div>
   );

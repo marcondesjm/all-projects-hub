@@ -47,7 +47,9 @@ import {
   Trash2, 
   Save,
   Plus,
-  Shield
+  Shield,
+  FileText,
+  FileJson
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -510,36 +512,66 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
                 </Accordion>
               )}
 
-              {/* Campos disponíveis (quando não há keys) */}
-              {accountsWithKeys.length === 0 && (
-                <div className="pt-4 border-t">
-                  <p className="text-xs text-muted-foreground mb-3">
+              {/* Campos disponíveis e templates */}
+              <div className="pt-4 border-t">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs text-muted-foreground">
                     Campos disponíveis para cadastro:
                   </p>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
-                      <span className="text-sm">URL Supabase</span>
-                      <code className="text-xs text-muted-foreground">https://xxx.supabase.co</code>
-                    </div>
-                    <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
-                      <span className="text-sm">Anon Key</span>
-                      <code className="text-xs text-muted-foreground">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code>
-                    </div>
-                    <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
-                      <span className="text-sm">Service Role Key</span>
-                      <code className="text-xs text-muted-foreground">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code>
-                    </div>
-                    <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
-                      <span className="text-sm">OpenAI Key</span>
-                      <code className="text-xs text-muted-foreground">sk-proj-...</code>
-                    </div>
-                    <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
-                      <span className="text-sm">Keys Personalizadas</span>
-                      <code className="text-xs text-muted-foreground">Nome + Valor</code>
-                    </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs gap-1"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = '/templates/keys-template.txt';
+                        link.download = 'keys-template.txt';
+                        link.click();
+                      }}
+                    >
+                      <FileText className="w-3 h-3" />
+                      TXT
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 text-xs gap-1"
+                      onClick={() => {
+                        const link = document.createElement('a');
+                        link.href = '/templates/keys-template.json';
+                        link.download = 'keys-template.json';
+                        link.click();
+                      }}
+                    >
+                      <FileJson className="w-3 h-3" />
+                      JSON
+                    </Button>
                   </div>
                 </div>
-              )}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
+                    <span className="text-sm">URL Supabase</span>
+                    <code className="text-xs text-muted-foreground">https://xxx.supabase.co</code>
+                  </div>
+                  <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
+                    <span className="text-sm">Anon Key</span>
+                    <code className="text-xs text-muted-foreground">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code>
+                  </div>
+                  <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
+                    <span className="text-sm">Service Role Key</span>
+                    <code className="text-xs text-muted-foreground">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code>
+                  </div>
+                  <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
+                    <span className="text-sm">OpenAI Key</span>
+                    <code className="text-xs text-muted-foreground">sk-proj-...</code>
+                  </div>
+                  <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
+                    <span className="text-sm">Keys Personalizadas</span>
+                    <code className="text-xs text-muted-foreground">Nome + Valor</code>
+                  </div>
+                </div>
+              </div>
 
               {/* Contas sem keys */}
               {accountsWithoutKeys.length > 0 && (

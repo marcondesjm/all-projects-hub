@@ -27,6 +27,7 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 import { useSeedDemoData } from '@/hooks/useSeedDemoData';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useProjectPresence } from '@/hooks/useProjectPresence';
+import { useMultipleChecklistProgress } from '@/hooks/useChecklistProgress';
 import { WhatsAppSupportButton } from '@/components/support/WhatsAppSupportButton';
 import { ProjectStatus, ProjectType } from '@/types/project';
 import { Loader2 } from 'lucide-react';
@@ -99,6 +100,9 @@ export default function Dashboard() {
   // Project presence for online users
   const projectIds = useMemo(() => projects.map(p => p.id), [projects]);
   const { getProjectOnlineUsers } = useProjectPresence(projectIds);
+  
+  // Checklist progress for all projects
+  const { data: checklistProgressMap = {} } = useMultipleChecklistProgress(projectIds);
 
   // Seed demo data for new users
   useEffect(() => {
@@ -443,6 +447,7 @@ export default function Dashboard() {
               {transformedProjects.map((project, index) => {
                 const account = getAccount(project.accountId);
                 const onlineUsers = getProjectOnlineUsers(project.id);
+                const checklistProgress = checklistProgressMap[project.id];
                 return (
                   <div
                     key={project.id}
@@ -453,6 +458,7 @@ export default function Dashboard() {
                       project={project}
                       account={account}
                       onlineUsers={onlineUsers}
+                      checklistProgress={checklistProgress}
                       onToggleFavorite={handleToggleFavorite}
                       onEdit={handleEditProject}
                       onDelete={handleDeleteProject}

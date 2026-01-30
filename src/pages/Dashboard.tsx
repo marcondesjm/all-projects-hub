@@ -13,7 +13,7 @@ import { AddProjectModal } from '@/components/projects/AddProjectModal';
 import { EditProjectModal } from '@/components/projects/EditProjectModal';
 import { TagsManager } from '@/components/tags/TagsManager';
 import { SettingsModal } from '@/components/settings/SettingsModal';
-import { useAccounts, useProjects, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
+import { useAccounts, useProjects, useTags, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
 import { ProjectStatus, ProjectType } from '@/types/project';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -51,6 +51,7 @@ export default function Dashboard() {
 
   const { data: accounts = [], isLoading: accountsLoading } = useAccounts();
   const { data: projects = [], isLoading: projectsLoading } = useProjects();
+  const { data: tags = [] } = useTags();
   const toggleFavorite = useToggleFavorite();
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
@@ -285,6 +286,7 @@ export default function Dashboard() {
             onTagChange={setTagFilter}
             onClearFilters={clearFilters}
             hasActiveFilters={hasActiveFilters}
+            tags={tags}
           />
 
           {/* Projects */}

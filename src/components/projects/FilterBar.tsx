@@ -8,8 +8,13 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { mockAccounts, mockTags } from '@/data/mockData';
 import { ProjectStatus, ProjectType } from '@/types/project';
+
+interface Tag {
+  id: string;
+  name: string;
+  color: string;
+}
 
 interface FilterBarProps {
   statusFilter: ProjectStatus | 'all';
@@ -20,6 +25,7 @@ interface FilterBarProps {
   onTagChange: (tag: string | null) => void;
   onClearFilters: () => void;
   hasActiveFilters: boolean;
+  tags?: Tag[];
 }
 
 export function FilterBar({
@@ -31,6 +37,7 @@ export function FilterBar({
   onTagChange,
   onClearFilters,
   hasActiveFilters,
+  tags = [],
 }: FilterBarProps) {
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
@@ -63,18 +70,20 @@ export function FilterBar({
       </Select>
 
       {/* Tags */}
-      <div className="flex items-center gap-2">
-        {mockTags.slice(0, 4).map((tag) => (
-          <Badge
-            key={tag.id}
-            variant={tagFilter === tag.name ? 'default' : 'outline'}
-            className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-            onClick={() => onTagChange(tagFilter === tag.name ? null : tag.name)}
-          >
-            {tag.name}
-          </Badge>
-        ))}
-      </div>
+      {tags.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {tags.slice(0, 6).map((tag) => (
+            <Badge
+              key={tag.id}
+              variant={tagFilter === tag.name ? 'default' : 'outline'}
+              className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+              onClick={() => onTagChange(tagFilter === tag.name ? null : tag.name)}
+            >
+              {tag.name}
+            </Badge>
+          ))}
+        </div>
+      )}
 
       {/* Clear Filters */}
       {hasActiveFilters && (

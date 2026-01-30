@@ -4,6 +4,7 @@
     "anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.sua-anon-key-aqui",
     "service_role_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.sua-service-role-key-aqui",
     "openai_key": "sk-proj-sua-openai-key-aqui",
+    "notes": "Outras informações, tokens ou anotações importantes",
     "custom_keys": [
       {
         "name": "STRIPE_SECRET_KEY",
@@ -20,6 +21,7 @@
     "anon_key": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.outra-anon-key",
     "service_role_key": "",
     "openai_key": "",
+    "notes": "",
     "custom_keys": []
   }
 }

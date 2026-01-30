@@ -619,6 +619,16 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
                       disabled={!selectedQuickAccount && accountsWithoutKeys.length > 0}
                     />
                   </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Outros (notas, tokens, etc.)</Label>
+                    <textarea
+                      placeholder="Cole aqui outras keys, tokens ou anotações..."
+                      value={quickAddKeys.notes || ''}
+                      onChange={(e) => setQuickAddKeys(prev => ({ ...prev, notes: e.target.value }))}
+                      disabled={!selectedQuickAccount && accountsWithoutKeys.length > 0}
+                      className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none"
+                    />
+                  </div>
 
                   {/* Botão salvar */}
                   {selectedQuickAccount && (
@@ -628,7 +638,7 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
                         if (!selectedQuickAccount) return;
                         
                         const hasAnyKey = quickAddKeys.supabase_url || quickAddKeys.anon_key || 
-                                         quickAddKeys.service_role_key || quickAddKeys.openai_key;
+                                         quickAddKeys.service_role_key || quickAddKeys.openai_key || quickAddKeys.notes;
                         
                         if (!hasAnyKey) {
                           toast({

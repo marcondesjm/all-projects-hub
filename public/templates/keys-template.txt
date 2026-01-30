@@ -26,6 +26,17 @@ OpenAI API Key:
 sk-proj-sua-chave-openai-aqui
 
 -------------------------------------------
+OUTROS (NOTAS, TOKENS, ETC.)
+-------------------------------------------
+
+Cole aqui outras informações importantes:
+- Tokens de acesso
+- Chaves de API adicionais
+- Anotações sobre configurações
+- URLs de webhooks
+- Credenciais de serviços externos
+
+-------------------------------------------
 KEYS PERSONALIZADAS
 -------------------------------------------
 

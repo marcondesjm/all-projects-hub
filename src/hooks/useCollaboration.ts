@@ -72,7 +72,7 @@ export function useCollaboration() {
   const [pendingInvitations, setPendingInvitations] = useState<(ProjectCollaborator | AccountCollaborator)[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch project collaborators
+  // Fetch project collaborators with profiles
   const fetchProjectCollaborators = useCallback(async (projectId: string) => {
     if (!user) return [];
     
@@ -85,8 +85,24 @@ export function useCollaboration() {
       console.error('Error fetching project collaborators:', error);
       return [];
     }
+
+    // Fetch profiles for collaborators
+    const collaboratorsWithProfiles = await Promise.all(
+      (data || []).map(async (collab) => {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('full_name, avatar_url, email')
+          .eq('email', collab.invited_email)
+          .maybeSingle();
+        
+        return {
+          ...collab,
+          profile: profile || undefined
+        } as ProjectCollaborator;
+      })
+    );
     
-    return data as ProjectCollaborator[];
+    return collaboratorsWithProfiles;
   }, [user]);
 
   // Fetch account collaborators
@@ -155,13 +171,13 @@ export function useCollaboration() {
   }, [user]);
 
   // Invite to project
-  const inviteToProject = async (projectId: string, email: string, role: CollaborationRole = 'viewer') => {
+  const inviteToProject = async (projectId: string, email: string, role: CollaborationRole = 'viewer', projectName?: string) => {
     if (!user) return { success: false, error: 'Not authenticated' };
     
     // Check if user exists
     const { data: existingUser } = await supabase
       .from('profiles')
-      .select('user_id')
+      .select('user_id, full_name')
       .eq('email', email)
       .maybeSingle();
 
@@ -189,7 +205,7 @@ export function useCollaboration() {
         existingUser.user_id,
         'project_invitation',
         'Convite para projeto',
-        `Você foi convidado para colaborar em um projeto`,
+        `Você foi convidado para colaborar no projeto "${projectName || 'Sem nome'}"`,
         'project',
         projectId
       );

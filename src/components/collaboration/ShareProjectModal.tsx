@@ -81,7 +81,7 @@ export function ShareProjectModal({
     }
 
     setLoading(true);
-    const result = await inviteToProject(projectId, email.trim(), role);
+    const result = await inviteToProject(projectId, email.trim(), role, projectName);
     setLoading(false);
 
     if (result.success) {

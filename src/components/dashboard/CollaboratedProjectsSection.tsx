@@ -67,9 +67,9 @@ export function CollaboratedProjectsSection({ onEditProject }: CollaboratedProje
                   variant="outline" 
                   className={cn(
                     "ml-2 text-xs shrink-0",
-                    project.role === 'admin' && "border-primary text-primary",
-                    project.role === 'editor' && "border-amber-500 text-amber-500",
-                    project.role === 'viewer' && "border-muted-foreground text-muted-foreground"
+                    project.role === 'admin' && "border-primary/50 text-primary",
+                    project.role === 'editor' && "border-yellow-500/50 text-yellow-600 dark:text-yellow-400",
+                    project.role === 'viewer' && "border-muted-foreground/50 text-muted-foreground"
                   )}
                 >
                   {project.role === 'admin' ? 'Admin' : 

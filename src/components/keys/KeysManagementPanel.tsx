@@ -69,6 +69,8 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
   const [editingAccount, setEditingAccount] = useState<EditingKeys | null>(null);
   const [showValues, setShowValues] = useState<Record<string, boolean>>({});
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+  const [quickAddKeys, setQuickAddKeys] = useState<AccountLocalKeys>({});
+  const [selectedQuickAccount, setSelectedQuickAccount] = useState<string>('');
   const { toast } = useToast();
 
   // Carregar todas as keys
@@ -512,11 +514,11 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
                 </Accordion>
               )}
 
-              {/* Campos disponíveis e templates */}
+              {/* Campos disponíveis e templates - formulário rápido */}
               <div className="pt-4 border-t">
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs text-muted-foreground">
-                    Campos disponíveis para cadastro:
+                  <p className="text-sm font-medium">
+                    Adicionar keys rapidamente:
                   </p>
                   <div className="flex gap-1">
                     <Button
@@ -549,57 +551,123 @@ export function KeysManagementPanel({ open, onOpenChange }: KeysManagementPanelP
                     </Button>
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
-                    <span className="text-sm">URL Supabase</span>
-                    <code className="text-xs text-muted-foreground">https://xxx.supabase.co</code>
-                  </div>
-                  <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
-                    <span className="text-sm">Anon Key</span>
-                    <code className="text-xs text-muted-foreground">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code>
-                  </div>
-                  <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
-                    <span className="text-sm">Service Role Key</span>
-                    <code className="text-xs text-muted-foreground">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...</code>
-                  </div>
-                  <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
-                    <span className="text-sm">OpenAI Key</span>
-                    <code className="text-xs text-muted-foreground">sk-proj-...</code>
-                  </div>
-                  <div className="flex items-center justify-between bg-muted/30 px-3 py-2 rounded-md">
-                    <span className="text-sm">Keys Personalizadas</span>
-                    <code className="text-xs text-muted-foreground">Nome + Valor</code>
-                  </div>
-                </div>
-              </div>
 
-              {/* Contas sem keys */}
-              {accountsWithoutKeys.length > 0 && (
-                <div className="pt-4 border-t">
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Contas sem keys cadastradas:
-                  </p>
-                  <ScrollArea className="max-h-32">
-                    <div className="flex flex-wrap gap-2 pr-2">
+                {/* Seletor de conta */}
+                {accountsWithoutKeys.length > 0 && (
+                  <div className="mb-4">
+                    <Label className="text-xs text-muted-foreground mb-2 block">Selecione uma conta:</Label>
+                    <div className="flex flex-wrap gap-2">
                       {accountsWithoutKeys.map((account) => (
                         <Badge 
                           key={account.id} 
-                          variant="outline" 
-                          className="gap-1 opacity-60 cursor-pointer hover:opacity-100 transition-opacity"
-                          onClick={() => startEditing(account.id)}
+                          variant={selectedQuickAccount === account.id ? "default" : "outline"} 
+                          className={cn(
+                            "gap-1 cursor-pointer transition-all",
+                            selectedQuickAccount === account.id ? "opacity-100" : "opacity-60 hover:opacity-100"
+                          )}
+                          onClick={() => {
+                            setSelectedQuickAccount(account.id);
+                            setQuickAddKeys({});
+                          }}
                         >
                           <div className={cn(
                             'w-2 h-2 rounded-full',
                             colorClasses[account.color]
                           )} />
                           {account.name}
-                          <Plus className="w-3 h-3 ml-1" />
                         </Badge>
                       ))}
                     </div>
-                  </ScrollArea>
+                  </div>
+                )}
+
+                {/* Campos editáveis */}
+                <div className="space-y-3">
+                  <div className="space-y-1">
+                    <Label className="text-xs">URL Supabase</Label>
+                    <Input
+                      placeholder="https://xxx.supabase.co"
+                      value={quickAddKeys.supabase_url || ''}
+                      onChange={(e) => setQuickAddKeys(prev => ({ ...prev, supabase_url: e.target.value }))}
+                      disabled={!selectedQuickAccount && accountsWithoutKeys.length > 0}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Anon Key</Label>
+                    <Input
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      value={quickAddKeys.anon_key || ''}
+                      onChange={(e) => setQuickAddKeys(prev => ({ ...prev, anon_key: e.target.value }))}
+                      disabled={!selectedQuickAccount && accountsWithoutKeys.length > 0}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Service Role Key</Label>
+                    <Input
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      value={quickAddKeys.service_role_key || ''}
+                      onChange={(e) => setQuickAddKeys(prev => ({ ...prev, service_role_key: e.target.value }))}
+                      disabled={!selectedQuickAccount && accountsWithoutKeys.length > 0}
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">OpenAI Key</Label>
+                    <Input
+                      placeholder="sk-proj-..."
+                      value={quickAddKeys.openai_key || ''}
+                      onChange={(e) => setQuickAddKeys(prev => ({ ...prev, openai_key: e.target.value }))}
+                      disabled={!selectedQuickAccount && accountsWithoutKeys.length > 0}
+                    />
+                  </div>
+
+                  {/* Botão salvar */}
+                  {selectedQuickAccount && (
+                    <Button
+                      className="w-full mt-2"
+                      onClick={() => {
+                        if (!selectedQuickAccount) return;
+                        
+                        const hasAnyKey = quickAddKeys.supabase_url || quickAddKeys.anon_key || 
+                                         quickAddKeys.service_role_key || quickAddKeys.openai_key;
+                        
+                        if (!hasAnyKey) {
+                          toast({
+                            title: 'Preencha pelo menos um campo',
+                            variant: 'destructive',
+                          });
+                          return;
+                        }
+
+                        saveAccountLocalKeys(selectedQuickAccount, quickAddKeys);
+                        refreshKeys();
+                        setQuickAddKeys({});
+                        setSelectedQuickAccount('');
+                        toast({
+                          title: 'Keys salvas!',
+                          description: `Keys adicionadas para ${getAccountName(selectedQuickAccount)}`,
+                        });
+                      }}
+                      disabled={!selectedQuickAccount}
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      Salvar Keys para {selectedQuickAccount ? getAccountName(selectedQuickAccount) : 'conta'}
+                    </Button>
+                  )}
+
+                  {!selectedQuickAccount && accountsWithoutKeys.length > 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-2">
+                      Selecione uma conta acima para preencher as keys
+                    </p>
+                  )}
+
+                  {accountsWithoutKeys.length === 0 && accounts.length > 0 && (
+                    <p className="text-xs text-muted-foreground text-center py-2">
+                      Todas as contas já possuem keys cadastradas
+                    </p>
+                  )}
                 </div>
-              )}
+              </div>
+
             </div>
           </ScrollArea>
           </div>

@@ -14,8 +14,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User, Shield, Palette } from 'lucide-react';
+import { Loader2, User, Shield, Palette, Database, Trash2, RotateCcw, HelpCircle } from 'lucide-react';
 import { useTheme } from '@/components/theme/ThemeProvider';
+import { useSeedDemoData } from '@/hooks/useSeedDemoData';
+import { useOnboarding } from '@/hooks/useOnboarding';
+import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 
 interface SettingsModalProps {
@@ -27,6 +30,9 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const { user } = useAuth();
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { clearDemoData, clearing, hasDemoAccount, seedDemoData, seeding } = useSeedDemoData();
+  const { resetOnboarding } = useOnboarding();
   
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,13 +40,22 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
+  const [hasDemoData, setHasDemoData] = useState(false);
+  const [checkingDemo, setCheckingDemo] = useState(true);
 
   useEffect(() => {
-    if (user) {
-      // Fetch profile data
+    if (user && open) {
       fetchProfile();
+      checkDemoData();
     }
-  }, [user]);
+  }, [user, open]);
+
+  const checkDemoData = async () => {
+    setCheckingDemo(true);
+    const hasDemo = await hasDemoAccount();
+    setHasDemoData(hasDemo);
+    setCheckingDemo(false);
+  };
 
   const fetchProfile = async () => {
     if (!user) return;
@@ -133,6 +148,53 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
     }
   };
 
+  const handleClearDemoData = async () => {
+    const success = await clearDemoData();
+    if (success) {
+      toast({
+        title: 'Dados de demonstração removidos',
+        description: 'A conta e projetos de demonstração foram excluídos.',
+      });
+      setHasDemoData(false);
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    } else {
+      toast({
+        title: 'Erro ao remover dados',
+        description: 'Tente novamente.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleRestartTour = () => {
+    resetOnboarding();
+    toast({
+      title: 'Tour reiniciado',
+      description: 'O tour será exibido na próxima vez que você acessar o dashboard.',
+    });
+    onOpenChange(false);
+  };
+
+  const handleAddDemoData = async () => {
+    const success = await seedDemoData();
+    if (success) {
+      toast({
+        title: 'Dados de demonstração adicionados',
+        description: 'Projetos de exemplo foram criados para você explorar.',
+      });
+      setHasDemoData(true);
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['projects'] });
+    } else {
+      toast({
+        title: 'Dados já existem',
+        description: 'Você já possui dados no sistema.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   const themeOptions = [
     { id: 'light', label: 'Claro', description: 'Tema claro padrão' },
     { id: 'dark', label: 'Escuro', description: 'Tema escuro para menos cansaço visual' },
@@ -150,18 +212,22 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="profile" className="gap-2">
-              <User className="w-4 h-4" />
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="profile" className="gap-1 text-xs">
+              <User className="w-3 h-3" />
               Perfil
             </TabsTrigger>
-            <TabsTrigger value="security" className="gap-2">
-              <Shield className="w-4 h-4" />
+            <TabsTrigger value="security" className="gap-1 text-xs">
+              <Shield className="w-3 h-3" />
               Segurança
             </TabsTrigger>
-            <TabsTrigger value="appearance" className="gap-2">
-              <Palette className="w-4 h-4" />
+            <TabsTrigger value="appearance" className="gap-1 text-xs">
+              <Palette className="w-3 h-3" />
               Aparência
+            </TabsTrigger>
+            <TabsTrigger value="data" className="gap-1 text-xs">
+              <Database className="w-3 h-3" />
+              Dados
             </TabsTrigger>
           </TabsList>
 
@@ -275,6 +341,80 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                   </button>
                 ))}
               </div>
+            </div>
+          </TabsContent>
+
+          {/* Data Tab */}
+          <TabsContent value="data" className="space-y-4 mt-4">
+            {/* Demo Data Section */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Database className="w-4 h-4" />
+                Dados de Demonstração
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Os dados de demonstração incluem uma conta e 4 projetos de exemplo para você explorar o painel.
+              </p>
+              
+              {checkingDemo ? (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Verificando...
+                </div>
+              ) : hasDemoData ? (
+                <Button 
+                  variant="destructive" 
+                  onClick={handleClearDemoData}
+                  disabled={clearing}
+                >
+                  {clearing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Removendo...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Remover Dados de Demo
+                    </>
+                  )}
+                </Button>
+              ) : (
+                <Button 
+                  variant="outline" 
+                  onClick={handleAddDemoData}
+                  disabled={seeding}
+                >
+                  {seeding ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Criando...
+                    </>
+                  ) : (
+                    <>
+                      <Database className="mr-2 h-4 w-4" />
+                      Adicionar Dados de Demo
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+
+            <div className="border-t pt-4" />
+
+            {/* Restart Tour Section */}
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <HelpCircle className="w-4 h-4" />
+                Tour de Ajuda
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Reinicie o tour para ver novamente as explicações de cada botão e funcionalidade.
+              </p>
+              <Button variant="outline" onClick={handleRestartTour}>
+                <RotateCcw className="mr-2 h-4 w-4" />
+                Reiniciar Tour
+              </Button>
             </div>
           </TabsContent>
         </Tabs>

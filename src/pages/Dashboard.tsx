@@ -22,6 +22,8 @@ import { TrialBanner } from '@/components/subscription/TrialBanner';
 import { TrialExpiredModal } from '@/components/subscription/TrialExpiredModal';
 import { ExportBackupButton } from '@/components/export/ExportBackupButton';
 import { ImportBackupButton } from '@/components/export/ImportBackupButton';
+import { RefreshButton } from '@/components/dashboard/RefreshButton';
+import { CollaboratedProjectsSection } from '@/components/dashboard/CollaboratedProjectsSection';
 import { useAccounts, useProjects, useTags, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useSeedDemoData } from '@/hooks/useSeedDemoData';
@@ -396,10 +398,14 @@ export default function Dashboard() {
           {/* Charts */}
           <ProjectCharts projects={projects} />
 
+          {/* Collaborated Projects Section */}
+          <CollaboratedProjectsSection onEditProject={handleEditProject} />
+
           {/* Title */}
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-foreground">{getViewTitle()}</h2>
             <div className="flex items-center gap-2">
+              <RefreshButton />
               <ImportBackupButton />
               <ExportBackupButton />
               <span className="text-sm text-muted-foreground">

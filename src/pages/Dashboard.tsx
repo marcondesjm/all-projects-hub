@@ -5,9 +5,24 @@ import { StatsCards } from '@/components/dashboard/StatsCards';
 import { FilterBar } from '@/components/projects/FilterBar';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectList } from '@/components/projects/ProjectList';
-import { useAccounts, useProjects, useToggleFavorite, LovableAccount } from '@/hooks/useProjects';
+import { AddAccountModal } from '@/components/accounts/AddAccountModal';
+import { AddProjectModal } from '@/components/projects/AddProjectModal';
+import { EditProjectModal } from '@/components/projects/EditProjectModal';
+import { TagsManager } from '@/components/tags/TagsManager';
+import { useAccounts, useProjects, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
 import { ProjectStatus, ProjectType } from '@/types/project';
 import { Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -18,9 +33,21 @@ export default function Dashboard() {
   const [typeFilter, setTypeFilter] = useState<ProjectType | 'all'>('all');
   const [tagFilter, setTagFilter] = useState<string | null>(null);
 
+  // Modal states
+  const [addAccountOpen, setAddAccountOpen] = useState(false);
+  const [addProjectOpen, setAddProjectOpen] = useState(false);
+  const [tagsManagerOpen, setTagsManagerOpen] = useState(false);
+  const [editProjectOpen, setEditProjectOpen] = useState(false);
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
+
   const { data: accounts = [], isLoading: accountsLoading } = useAccounts();
   const { data: projects = [], isLoading: projectsLoading } = useProjects();
   const toggleFavorite = useToggleFavorite();
+  const updateProject = useUpdateProject();
+  const deleteProject = useDeleteProject();
+  const { toast } = useToast();
 
   const filteredProjects = useMemo(() => {
     let filtered = [...projects];
@@ -71,6 +98,68 @@ export default function Dashboard() {
     const project = projects.find(p => p.id === projectId);
     if (project) {
       toggleFavorite.mutate({ id: projectId, isFavorite: !project.is_favorite });
+    }
+  };
+
+  const handleEditProject = (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      setEditingProject(project);
+      setEditProjectOpen(true);
+    }
+  };
+
+  const handleDeleteProject = (projectId: string) => {
+    setDeletingProjectId(projectId);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!deletingProjectId) return;
+    
+    const project = projects.find(p => p.id === deletingProjectId);
+    try {
+      await deleteProject.mutateAsync(deletingProjectId);
+      toast({
+        title: 'Projeto excluído',
+        description: `O projeto "${project?.name}" foi excluído.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erro ao excluir',
+        description: error.message || 'Tente novamente.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteDialogOpen(false);
+      setDeletingProjectId(null);
+    }
+  };
+
+  const handleArchiveProject = async (projectId: string) => {
+    const project = projects.find(p => p.id === projectId);
+    if (!project) return;
+
+    const newStatus = project.status === 'archived' ? 'draft' : 'archived';
+    try {
+      await updateProject.mutateAsync({ id: projectId, status: newStatus });
+      toast({
+        title: newStatus === 'archived' ? 'Projeto arquivado' : 'Projeto restaurado',
+        description: `O projeto "${project.name}" foi ${newStatus === 'archived' ? 'arquivado' : 'restaurado'}.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message || 'Tente novamente.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleViewChange = (view: string) => {
+    setActiveView(view);
+    if (view === 'tags') {
+      setTagsManagerOpen(true);
     }
   };
 
@@ -133,15 +222,18 @@ export default function Dashboard() {
 
   const isLoading = accountsLoading || projectsLoading;
 
+  const deletingProject = deletingProjectId ? projects.find(p => p.id === deletingProjectId) : null;
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar
         activeView={activeView}
-        onViewChange={setActiveView}
+        onViewChange={handleViewChange}
         selectedAccount={selectedAccount}
         onAccountChange={setSelectedAccount}
         accounts={accounts}
         isLoading={accountsLoading}
+        onAddAccount={() => setAddAccountOpen(true)}
       />
       
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -150,6 +242,7 @@ export default function Dashboard() {
           onSearchChange={setSearchQuery}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
+          onNewProject={() => setAddProjectOpen(true)}
         />
         
         <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
@@ -217,6 +310,9 @@ export default function Dashboard() {
                         projectCount: transformedAccounts.find(a => a.id === account.id)?.projectCount || 0,
                       } : undefined}
                       onToggleFavorite={handleToggleFavorite}
+                      onEdit={handleEditProject}
+                      onDelete={handleDeleteProject}
+                      onArchive={handleArchiveProject}
                     />
                   </div>
                 );
@@ -227,10 +323,57 @@ export default function Dashboard() {
               projects={transformedProjects}
               accounts={transformedAccounts}
               onToggleFavorite={handleToggleFavorite}
+              onEdit={handleEditProject}
+              onDelete={handleDeleteProject}
+              onArchive={handleArchiveProject}
             />
           )}
         </main>
       </div>
+
+      {/* Modals */}
+      <AddAccountModal 
+        open={addAccountOpen} 
+        onOpenChange={setAddAccountOpen} 
+      />
+      
+      <AddProjectModal 
+        open={addProjectOpen} 
+        onOpenChange={setAddProjectOpen} 
+      />
+      
+      <EditProjectModal
+        open={editProjectOpen}
+        onOpenChange={setEditProjectOpen}
+        project={editingProject}
+      />
+      
+      <TagsManager 
+        open={tagsManagerOpen} 
+        onOpenChange={setTagsManagerOpen} 
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir projeto?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Esta ação não pode ser desfeita. O projeto "{deletingProject?.name}" será 
+              permanentemente excluído.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

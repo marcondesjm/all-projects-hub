@@ -8,9 +8,10 @@ interface HeaderProps {
   onSearchChange: (query: string) => void;
   viewMode: 'grid' | 'list';
   onViewModeChange: (mode: 'grid' | 'list') => void;
+  onNewProject?: () => void;
 }
 
-export function Header({ searchQuery, onSearchChange, viewMode, onViewModeChange }: HeaderProps) {
+export function Header({ searchQuery, onSearchChange, viewMode, onViewModeChange, onNewProject }: HeaderProps) {
   return (
     <header className="h-16 px-6 flex items-center justify-between border-b border-border bg-card/50 backdrop-blur-sm">
       {/* Search */}
@@ -62,7 +63,7 @@ export function Header({ searchQuery, onSearchChange, viewMode, onViewModeChange
         </Button>
 
         {/* New Project */}
-        <Button className="gap-2 shadow-sm">
+        <Button className="gap-2 shadow-sm" onClick={onNewProject}>
           <Plus className="w-4 h-4" />
           Novo Projeto
         </Button>

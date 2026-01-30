@@ -1,4 +1,5 @@
-import { Project, LovableAccount } from '@/types/project';
+import { Project } from '@/types/project';
+import { LovableAccount } from '@/hooks/useProjects';
 import {
   HoverCard,
   HoverCardContent,

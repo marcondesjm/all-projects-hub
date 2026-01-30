@@ -7,6 +7,8 @@ export interface LovableAccount {
   name: string;
   color: 'blue' | 'emerald' | 'amber' | 'rose' | 'violet';
   projectCount: number;
+  credits: number;
+  credits_updated_at?: string;
 }
 
 export interface Project {

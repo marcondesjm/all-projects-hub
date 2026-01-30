@@ -133,7 +133,7 @@ export default function Admin() {
   const [sortField, setSortField] = useState<SortField>('created_at');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
-  // Real-time subscription for users
+  // Real-time subscription for users - syncs when new accounts are created
   useEffect(() => {
     const channel = supabase
       .channel('admin-realtime')
@@ -155,6 +155,16 @@ export default function Admin() {
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'projects' },
+        () => refetch()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'user_roles' },
+        () => refetch()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'payment_receipts' },
         () => refetch()
       )
       .subscribe();

@@ -13,9 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useUpdateAccount, useDeleteAccount, LovableAccount } from '@/hooks/useProjects';
-import { useLocalKeys, deleteAccountLocalKeys } from '@/hooks/useLocalKeys';
+import { useLocalKeys, deleteAccountLocalKeys, AccountLocalKeys } from '@/hooks/useLocalKeys';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Coins, Trash2, Key, Globe, User, Mail, FileText, HardDrive } from 'lucide-react';
+import { Loader2, Coins, Trash2, Key, Globe, User, Mail, FileText, HardDrive, Plus, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -34,6 +34,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 interface EditAccountModalProps {
   open: boolean;
@@ -49,6 +50,11 @@ const colors = [
   { id: 'violet', label: 'Violeta', class: 'bg-violet-500' },
 ] as const;
 
+interface CustomKey {
+  name: string;
+  value: string;
+}
+
 export function EditAccountModal({ open, onOpenChange, account }: EditAccountModalProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -58,6 +64,8 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
   const [supabaseUrl, setSupabaseUrl] = useState('');
   const [anonKey, setAnonKey] = useState('');
   const [serviceRoleKey, setServiceRoleKey] = useState('');
+  const [openaiKey, setOpenaiKey] = useState('');
+  const [customKeys, setCustomKeys] = useState<CustomKey[]>([]);
   const [notes, setNotes] = useState('');
   const [selectedColor, setSelectedColor] = useState<'blue' | 'emerald' | 'amber' | 'rose' | 'violet'>('blue');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -76,7 +84,6 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
       setAdminEmail(account.admin_email || '');
       setCredits(account.credits?.toString() || '0');
       setSupabaseProjectId(account.supabase_project_id || '');
-      setSupabaseUrl(account.supabase_url || '');
       setNotes(account.notes || '');
       setSelectedColor(account.color);
     }
@@ -85,10 +92,27 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
   // Carregar keys do localStorage quando disponíveis
   useEffect(() => {
     if (keysLoaded && account) {
+      setSupabaseUrl(localKeys.supabase_url || '');
       setAnonKey(localKeys.anon_key || '');
       setServiceRoleKey(localKeys.service_role_key || '');
+      setOpenaiKey(localKeys.openai_key || '');
+      setCustomKeys(localKeys.custom_keys || []);
     }
   }, [keysLoaded, localKeys, account]);
+
+  const addCustomKey = () => {
+    setCustomKeys([...customKeys, { name: '', value: '' }]);
+  };
+
+  const removeCustomKey = (index: number) => {
+    setCustomKeys(customKeys.filter((_, i) => i !== index));
+  };
+
+  const updateCustomKey = (index: number, field: 'name' | 'value', value: string) => {
+    const updated = [...customKeys];
+    updated[index][field] = value;
+    setCustomKeys(updated);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,21 +146,29 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
         color: selectedColor,
         credits: creditsValue,
         supabase_project_id: supabaseProjectId.trim() || null,
-        supabase_url: supabaseUrl.trim() || null,
-        anon_key: null, // Não enviar para o banco
-        service_role_key: null, // Não enviar para o banco
+        supabase_url: null,
+        anon_key: null,
+        service_role_key: null,
         notes: notes.trim() || null,
       });
 
       // Salvar keys localmente
-      saveKeys({
-        anon_key: anonKey.trim() || undefined,
-        service_role_key: serviceRoleKey.trim() || undefined,
-      });
+      const localKeysToSave: AccountLocalKeys = {};
+      if (supabaseUrl.trim()) localKeysToSave.supabase_url = supabaseUrl.trim();
+      if (anonKey.trim()) localKeysToSave.anon_key = anonKey.trim();
+      if (serviceRoleKey.trim()) localKeysToSave.service_role_key = serviceRoleKey.trim();
+      if (openaiKey.trim()) localKeysToSave.openai_key = openaiKey.trim();
+      
+      const validCustomKeys = customKeys.filter(k => k.name.trim() && k.value.trim());
+      if (validCustomKeys.length > 0) {
+        localKeysToSave.custom_keys = validCustomKeys;
+      }
+      
+      saveKeys(localKeysToSave);
       
       toast({
         title: 'Conta atualizada!',
-        description: `A conta "${name}" foi atualizada.${anonKey || serviceRoleKey ? ' As API Keys foram salvas localmente.' : ''}`,
+        description: `A conta "${name}" foi atualizada.`,
       });
       
       onOpenChange(false);
@@ -154,7 +186,6 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
 
     try {
       await deleteAccount.mutateAsync(account.id);
-      // Também remover keys locais
       deleteAccountLocalKeys(account.id);
       toast({
         title: 'Conta excluída',
@@ -288,16 +319,6 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
                           onChange={(e) => setSupabaseProjectId(e.target.value)}
                         />
                       </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="edit-supabase-url">URL do Projeto</Label>
-                        <Input
-                          id="edit-supabase-url"
-                          placeholder="https://xxx.supabase.co"
-                          value={supabaseUrl}
-                          onChange={(e) => setSupabaseUrl(e.target.value)}
-                        />
-                      </div>
                     </AccordionContent>
                   </AccordionItem>
 
@@ -305,7 +326,7 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
                     <AccordionTrigger className="text-sm font-medium hover:no-underline">
                       <span className="flex items-center gap-2">
                         <Key className="w-4 h-4 text-primary" />
-                        API Keys
+                        API Keys & Credenciais
                         <Badge variant="outline" className="ml-2 text-xs gap-1">
                           <HardDrive className="w-3 h-3" />
                           Local
@@ -313,19 +334,30 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
                       </span>
                     </AccordionTrigger>
                     <AccordionContent className="space-y-4 pb-4">
-                      <div className="p-3 rounded-lg bg-muted/50 border border-border">
-                        <p className="text-xs text-muted-foreground flex items-start gap-2">
-                          <HardDrive className="w-4 h-4 flex-shrink-0 mt-0.5" />
-                          <span>
-                            <strong>Armazenamento Local:</strong> As API Keys são salvas apenas no seu navegador 
-                            (localStorage) e nunca são enviadas para o servidor. Elas ficarão disponíveis 
-                            apenas neste dispositivo.
-                          </span>
-                        </p>
+                      {/* Aviso de armazenamento local */}
+                      <Alert variant="default" className="bg-amber-500/10 border-amber-500/30">
+                        <AlertTriangle className="h-4 w-4 text-amber-500" />
+                        <AlertDescription className="text-xs">
+                          <strong>⚠️ Importante:</strong> As keys são salvas apenas neste navegador/dispositivo 
+                          (localStorage) e nunca são enviadas para o servidor. Se você limpar os dados do navegador 
+                          ou usar outro dispositivo, precisará cadastrá-las novamente.
+                        </AlertDescription>
+                      </Alert>
+
+                      {/* URL Supabase */}
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-supabase-url">URL Supabase</Label>
+                        <Input
+                          id="edit-supabase-url"
+                          placeholder="https://xxx.supabase.co"
+                          value={supabaseUrl}
+                          onChange={(e) => setSupabaseUrl(e.target.value)}
+                        />
                       </div>
 
+                      {/* Anon Key Supabase */}
                       <div className="space-y-2">
-                        <Label htmlFor="edit-anon-key">Anon Key (Pública)</Label>
+                        <Label htmlFor="edit-anon-key">Anon Key Supabase</Label>
                         <Input
                           id="edit-anon-key"
                           placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp..."
@@ -334,8 +366,9 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
                         />
                       </div>
 
+                      {/* Service Role Key */}
                       <div className="space-y-2">
-                        <Label htmlFor="edit-service-role-key">Service Role Key (Privada)</Label>
+                        <Label htmlFor="edit-service-role-key">Service Role Key Supabase</Label>
                         <Input
                           id="edit-service-role-key"
                           type="password"
@@ -343,9 +376,70 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
                           value={serviceRoleKey}
                           onChange={(e) => setServiceRoleKey(e.target.value)}
                         />
-                        <p className="text-xs text-muted-foreground">
-                          ⚠️ Mantenha esta chave em segredo. Nunca compartilhe publicamente.
-                        </p>
+                      </div>
+
+                      {/* OpenAI Key */}
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-openai-key">Key OpenAI</Label>
+                        <Input
+                          id="edit-openai-key"
+                          type="password"
+                          placeholder="sk-..."
+                          value={openaiKey}
+                          onChange={(e) => setOpenaiKey(e.target.value)}
+                        />
+                      </div>
+
+                      {/* Keys Customizadas */}
+                      <div className="space-y-3 pt-2 border-t">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm font-medium">Keys Personalizadas</Label>
+                          <Button 
+                            type="button" 
+                            variant="outline" 
+                            size="sm"
+                            onClick={addCustomKey}
+                            className="h-7 text-xs"
+                          >
+                            <Plus className="w-3 h-3 mr-1" />
+                            Adicionar
+                          </Button>
+                        </div>
+                        
+                        {customKeys.length === 0 ? (
+                          <p className="text-xs text-muted-foreground">
+                            Adicione keys personalizadas como Stripe, Twilio, etc.
+                          </p>
+                        ) : (
+                          <div className="space-y-2">
+                            {customKeys.map((key, index) => (
+                              <div key={index} className="flex gap-2">
+                                <Input
+                                  placeholder="Nome (ex: STRIPE_KEY)"
+                                  value={key.name}
+                                  onChange={(e) => updateCustomKey(index, 'name', e.target.value)}
+                                  className="flex-1"
+                                />
+                                <Input
+                                  type="password"
+                                  placeholder="Valor"
+                                  value={key.value}
+                                  onChange={(e) => updateCustomKey(index, 'value', e.target.value)}
+                                  className="flex-1"
+                                />
+                                <Button
+                                  type="button"
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => removeCustomKey(index)}
+                                  className="h-10 w-10 text-destructive hover:text-destructive"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </AccordionContent>
                   </AccordionItem>

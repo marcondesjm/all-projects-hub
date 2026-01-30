@@ -1,8 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 
 export interface AccountLocalKeys {
+  supabase_url?: string;
   anon_key?: string;
   service_role_key?: string;
+  openai_key?: string;
+  custom_keys?: { name: string; value: string }[];
 }
 
 const STORAGE_KEY = 'lovable_account_keys';
@@ -77,7 +80,7 @@ export function useNewAccountKeys() {
   const [tempKeys, setTempKeys] = useState<AccountLocalKeys>({});
 
   const saveToAccount = useCallback((accountId: string) => {
-    if (tempKeys.anon_key || tempKeys.service_role_key) {
+    if (tempKeys.anon_key || tempKeys.service_role_key || tempKeys.openai_key || tempKeys.supabase_url || (tempKeys.custom_keys && tempKeys.custom_keys.length > 0)) {
       saveAccountLocalKeys(accountId, tempKeys);
     }
     setTempKeys({});

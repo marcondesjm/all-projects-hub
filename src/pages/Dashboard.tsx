@@ -267,11 +267,17 @@ export default function Dashboard() {
 
   const hasActiveFilters = statusFilter !== 'all' || typeFilter !== 'all' || tagFilter !== null;
 
+  const now = new Date();
+  const overdueProjects = projects.filter(p => 
+    p.deadline && new Date(p.deadline) < now && p.status !== 'published' && p.status !== 'archived'
+  );
+
   const stats = {
     totalProjects: projects.length,
     favorites: projects.filter(p => p.is_favorite).length,
     published: projects.filter(p => p.status === 'published').length,
     archived: projects.filter(p => p.status === 'archived').length,
+    overdue: overdueProjects.length,
   };
 
   const getAccount = (accountId: string): LovableAccount | undefined => 
@@ -302,6 +308,7 @@ export default function Dashboard() {
     accountId: p.account_id,
     createdAt: new Date(p.created_at),
     updatedAt: new Date(p.updated_at),
+    deadline: p.deadline ? new Date(p.deadline) : null,
     isFavorite: p.is_favorite,
     tags: p.tags?.map(t => t.name) || [],
     notes: p.notes,

@@ -143,6 +143,7 @@ export function ImportBackupButton({
             notes: project.notes || '',
             account_id: newAccountId,
             screenshot: project.screenshot || null,
+            deadline: project.deadline || null,
           });
           projectsImported++;
         } catch (e) {

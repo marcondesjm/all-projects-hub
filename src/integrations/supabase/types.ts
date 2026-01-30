@@ -56,7 +56,11 @@ export type Database = {
           created_at: string
           email: string
           full_name: string | null
+          has_connected_account: boolean
+          has_created_project: boolean
           id: string
+          onboarding_completed: boolean
+          onboarding_step: number
           updated_at: string
           user_id: string
         }
@@ -65,7 +69,11 @@ export type Database = {
           created_at?: string
           email: string
           full_name?: string | null
+          has_connected_account?: boolean
+          has_created_project?: boolean
           id?: string
+          onboarding_completed?: boolean
+          onboarding_step?: number
           updated_at?: string
           user_id: string
         }
@@ -74,7 +82,11 @@ export type Database = {
           created_at?: string
           email?: string
           full_name?: string | null
+          has_connected_account?: boolean
+          has_created_project?: boolean
           id?: string
+          onboarding_completed?: boolean
+          onboarding_step?: number
           updated_at?: string
           user_id?: string
         }

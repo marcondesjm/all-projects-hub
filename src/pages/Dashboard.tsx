@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { MobileSidebar } from '@/components/layout/MobileSidebar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
@@ -14,7 +14,10 @@ import { AddProjectModal } from '@/components/projects/AddProjectModal';
 import { EditProjectModal } from '@/components/projects/EditProjectModal';
 import { TagsManager } from '@/components/tags/TagsManager';
 import { SettingsModal } from '@/components/settings/SettingsModal';
+import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
+import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
 import { useAccounts, useProjects, useTags, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
+import { useOnboarding } from '@/hooks/useOnboarding';
 import { ProjectStatus, ProjectType } from '@/types/project';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -57,6 +60,29 @@ export default function Dashboard() {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
   const { toast } = useToast();
+  
+  const {
+    onboarding,
+    isLoading: onboardingLoading,
+    completeStep,
+    markAccountConnected,
+    markProjectCreated,
+    completeOnboarding,
+    showTour,
+  } = useOnboarding();
+
+  // Update onboarding checklist when accounts/projects change
+  useEffect(() => {
+    if (accounts.length > 0 && onboarding && !onboarding.has_connected_account) {
+      markAccountConnected();
+    }
+  }, [accounts.length, onboarding?.has_connected_account]);
+
+  useEffect(() => {
+    if (projects.length > 0 && onboarding && !onboarding.has_created_project) {
+      markProjectCreated();
+    }
+  }, [projects.length, onboarding?.has_created_project]);
 
   const filteredProjects = useMemo(() => {
     let filtered = [...projects];
@@ -416,6 +442,27 @@ export default function Dashboard() {
         onViewChange={handleViewChange}
         onNewProject={() => setAddProjectOpen(true)}
       />
+
+      {/* Onboarding Tour */}
+      {showTour && onboarding && (
+        <OnboardingTour
+          currentStep={onboarding.onboarding_step}
+          onStepChange={completeStep}
+          onComplete={completeOnboarding}
+          onSkip={completeOnboarding}
+        />
+      )}
+
+      {/* Onboarding Checklist */}
+      {onboarding && !onboarding.onboarding_completed && !showTour && (
+        <OnboardingChecklist
+          hasConnectedAccount={onboarding.has_connected_account || accounts.length > 0}
+          hasCreatedProject={onboarding.has_created_project || projects.length > 0}
+          onConnectAccount={() => setAddAccountOpen(true)}
+          onCreateProject={() => setAddProjectOpen(true)}
+          onDismiss={completeOnboarding}
+        />
+      )}
     </div>
   );
 }

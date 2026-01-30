@@ -296,10 +296,8 @@ export default function Dashboard() {
   }));
 
   const transformedAccounts = accounts.map(a => ({
-    id: a.id,
-    email: a.email,
-    name: a.name,
-    color: a.color,
+    ...a,
+    color: a.color as 'blue' | 'emerald' | 'amber' | 'rose' | 'violet',
     projectCount: projects.filter(p => p.account_id === a.id).length,
   }));
 
@@ -416,13 +414,7 @@ export default function Dashboard() {
                   >
                     <ProjectCard
                       project={project}
-                      account={account ? {
-                        id: account.id,
-                        email: account.email,
-                        name: account.name,
-                        color: account.color,
-                        projectCount: transformedAccounts.find(a => a.id === account.id)?.projectCount || 0,
-                      } : undefined}
+                      account={account}
                       onToggleFavorite={handleToggleFavorite}
                       onEdit={handleEditProject}
                       onDelete={handleDeleteProject}

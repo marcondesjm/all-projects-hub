@@ -7,6 +7,7 @@ export const mockAccounts: LovableAccount[] = [
     name: 'Trabalho Principal',
     color: 'blue',
     projectCount: 12,
+    credits: 150,
   },
   {
     id: '2',
@@ -14,6 +15,7 @@ export const mockAccounts: LovableAccount[] = [
     name: 'Freelance',
     color: 'emerald',
     projectCount: 8,
+    credits: 75,
   },
   {
     id: '3',
@@ -21,6 +23,7 @@ export const mockAccounts: LovableAccount[] = [
     name: 'Projetos Pessoais',
     color: 'amber',
     projectCount: 5,
+    credits: 200,
   },
   {
     id: '4',
@@ -28,6 +31,7 @@ export const mockAccounts: LovableAccount[] = [
     name: 'Agência XYZ',
     color: 'rose',
     projectCount: 15,
+    credits: 50,
   },
 ];
 

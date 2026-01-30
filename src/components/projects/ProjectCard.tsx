@@ -1,5 +1,6 @@
-import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye, Archive } from 'lucide-react';
-import { Project, LovableAccount } from '@/types/project';
+import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye, Archive, Coins } from 'lucide-react';
+import { Project } from '@/types/project';
+import { LovableAccount } from '@/hooks/useProjects';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
@@ -193,7 +194,19 @@ export function ProjectCard({ project, account, onToggleFavorite, onEdit, onDele
 
         {/* Footer */}
         <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border">
-          <span>{account?.name || 'Sem conta'}</span>
+          <div className="flex items-center gap-2">
+            {account && (
+              <>
+                <span className={cn('w-2 h-2 rounded-full', accountColorMap[account.color])} />
+                <span className="font-medium text-foreground">{account.name}</span>
+                <span className="flex items-center gap-0.5 text-primary">
+                  <Coins className="w-3 h-3" />
+                  {account.credits}
+                </span>
+              </>
+            )}
+            {!account && <span>Sem conta</span>}
+          </div>
           <span>
             {formatDistanceToNow(project.updatedAt, { addSuffix: true, locale: ptBR })}
           </span>

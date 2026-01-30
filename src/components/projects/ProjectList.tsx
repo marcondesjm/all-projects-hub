@@ -1,5 +1,6 @@
 import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Archive } from 'lucide-react';
-import { Project, LovableAccount } from '@/types/project';
+import { Project } from '@/types/project';
+import { LovableAccount } from '@/hooks/useProjects';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import {

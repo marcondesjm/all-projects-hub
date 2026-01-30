@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -132,7 +133,7 @@ export function PaymentModal({ open, onOpenChange }: PaymentModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <CreditCard className="w-5 h-5" />
@@ -143,7 +144,8 @@ export function PaymentModal({ open, onOpenChange }: PaymentModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <ScrollArea className="flex-1 max-h-[60vh] pr-4">
+          <div className="space-y-6">
           {/* Price Card */}
           <div className="bg-primary/5 border border-primary/20 rounded-xl p-4 text-center">
             <p className="text-sm text-muted-foreground mb-1">Valor mensal</p>
@@ -268,7 +270,8 @@ export function PaymentModal({ open, onOpenChange }: PaymentModalProps) {
               )}
             </Button>
           </form>
-        </div>
+          </div>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

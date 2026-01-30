@@ -334,6 +334,8 @@ export type Database = {
       }
       lovable_accounts: {
         Row: {
+          admin_email: string | null
+          anon_key: string | null
           color: string
           created_at: string
           credits: number
@@ -341,10 +343,16 @@ export type Database = {
           email: string
           id: string
           name: string
+          notes: string | null
+          service_role_key: string | null
+          supabase_project_id: string | null
+          supabase_url: string | null
           updated_at: string
           user_id: string
         }
         Insert: {
+          admin_email?: string | null
+          anon_key?: string | null
           color?: string
           created_at?: string
           credits?: number
@@ -352,10 +360,16 @@ export type Database = {
           email: string
           id?: string
           name: string
+          notes?: string | null
+          service_role_key?: string | null
+          supabase_project_id?: string | null
+          supabase_url?: string | null
           updated_at?: string
           user_id: string
         }
         Update: {
+          admin_email?: string | null
+          anon_key?: string | null
           color?: string
           created_at?: string
           credits?: number
@@ -363,6 +377,10 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          notes?: string | null
+          service_role_key?: string | null
+          supabase_project_id?: string | null
+          supabase_url?: string | null
           updated_at?: string
           user_id?: string
         }

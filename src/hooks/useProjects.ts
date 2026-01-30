@@ -196,15 +196,26 @@ export function useCreateProject() {
   
   return useMutation({
     mutationFn: async (project: Omit<Project, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'view_count' | 'tags'> & { tagIds?: string[] }) => {
+      if (!user?.id) {
+        throw new Error('Usuário não autenticado. Faça login novamente.');
+      }
+
       const { tagIds, ...projectData } = project;
+      
+      console.log('Creating project:', { ...projectData, user_id: user.id });
       
       const { data, error } = await supabase
         .from('projects')
-        .insert({ ...projectData, user_id: user!.id })
+        .insert({ ...projectData, user_id: user.id })
         .select()
         .single();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error creating project:', error);
+        throw error;
+      }
+      
+      console.log('Project created:', data);
       
       // Add tags if provided
       if (tagIds && tagIds.length > 0) {
@@ -215,13 +226,19 @@ export function useCreateProject() {
             tag_id: tagId,
           })));
         
-        if (tagError) throw tagError;
+        if (tagError) {
+          console.error('Error adding tags:', tagError);
+          throw tagError;
+        }
       }
       
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['projects'] });
+    },
+    onError: (error) => {
+      console.error('Mutation error:', error);
     },
   });
 }

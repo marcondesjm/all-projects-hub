@@ -27,6 +27,7 @@ import { useOnboarding } from '@/hooks/useOnboarding';
 import { useSeedDemoData } from '@/hooks/useSeedDemoData';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useProjectPresence } from '@/hooks/useProjectPresence';
+import { WhatsAppSupportButton } from '@/components/support/WhatsAppSupportButton';
 import { ProjectStatus, ProjectType } from '@/types/project';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -574,6 +575,9 @@ export default function Dashboard() {
           onDismiss={completeOnboarding}
         />
       )}
+
+      {/* WhatsApp Support Button (Mobile floating) */}
+      <WhatsAppSupportButton className="lg:hidden" />
       </div>
     </div>
   );

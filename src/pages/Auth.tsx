@@ -39,7 +39,7 @@ export default function Auth() {
         title: 'Bem-vindo de volta!',
         description: 'Login realizado com sucesso.',
       });
-      navigate('/');
+      navigate('/dashboard');
     }
 
     setIsLoading(false);

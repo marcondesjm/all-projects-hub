@@ -16,6 +16,7 @@ import { useUpdateAccount, useDeleteAccount, LovableAccount } from '@/hooks/useP
 import { useLocalKeys, deleteAccountLocalKeys, AccountLocalKeys } from '@/hooks/useLocalKeys';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, Coins, Trash2, Key, Globe, User, Mail, FileText, HardDrive, Plus, AlertTriangle } from 'lucide-react';
+import { KeysBackupButtons } from '@/components/keys/KeysBackupButtons';
 import { cn } from '@/lib/utils';
 import {
   AlertDialog,
@@ -343,6 +344,11 @@ export function EditAccountModal({ open, onOpenChange, account }: EditAccountMod
                           ou usar outro dispositivo, precisará cadastrá-las novamente.
                         </AlertDescription>
                       </Alert>
+
+                      {/* Botões de backup */}
+                      <div className="flex justify-end">
+                        <KeysBackupButtons />
+                      </div>
 
                       {/* URL Supabase */}
                       <div className="space-y-2">

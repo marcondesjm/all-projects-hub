@@ -140,10 +140,10 @@ export function Sidebar({
                     <div
                       key={account.id}
                       className={cn(
-                        'group w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-sm transition-all duration-200',
+                        'group w-full flex items-center gap-2 px-2 py-2 rounded-lg text-sm transition-all duration-200',
                         isActive
-                          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
-                          : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
+                          ? 'bg-primary/15 text-sidebar-foreground ring-1 ring-primary/30'
+                          : 'text-sidebar-foreground hover:bg-sidebar-accent'
                       )}
                     >
                       <button
@@ -151,29 +151,40 @@ export function Sidebar({
                           onAccountChange(account.id);
                           onViewChange('all');
                         }}
-                        className="flex-1 flex items-center gap-3 text-left"
+                        className="flex-1 flex items-center gap-2.5 text-left min-w-0"
                       >
-                        <span className={cn('w-2.5 h-2.5 rounded-full flex-shrink-0', accountColorMap[account.color] || 'bg-muted')} />
-                        <span className="flex-1 truncate">{account.name}</span>
-                        <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <span className={cn(
+                          'w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-background shadow-sm',
+                          accountColorMap[account.color] || 'bg-muted'
+                        )} />
+                        <span className="flex-1 truncate font-medium">{account.name}</span>
+                      </button>
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <span className="flex items-center gap-1 text-xs text-muted-foreground bg-muted/50 px-1.5 py-0.5 rounded">
                           <Coins className="w-3 h-3" />
                           {account.credits ?? 0}
                         </span>
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEditAccount?.(account);
-                        }}
-                        className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-sidebar-accent transition-all"
-                        title="Editar conta"
-                      >
-                        <Pencil className="w-3 h-3 text-muted-foreground" />
-                      </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onEditAccount?.(account);
+                          }}
+                          className={cn(
+                            'p-1.5 rounded-md transition-all duration-200',
+                            'text-muted-foreground hover:text-foreground',
+                            'hover:bg-primary/20 active:scale-95',
+                            'opacity-60 group-hover:opacity-100'
+                          )}
+                          title="Editar conta"
+                        >
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
                     </div>
                   );
                 })
               )}
+
               <Button
                 variant="ghost"
                 size="sm"

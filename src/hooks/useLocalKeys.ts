@@ -41,6 +41,30 @@ export function clearAllLocalKeys(): void {
   localStorage.removeItem(STORAGE_KEY);
 }
 
+// Exportar todas as keys como JSON
+export function exportLocalKeys(): string {
+  const allKeys = getLocalKeys();
+  return JSON.stringify(allKeys, null, 2);
+}
+
+// Importar keys de um JSON
+export function importLocalKeys(jsonString: string): { success: boolean; count: number; error?: string } {
+  try {
+    const parsed = JSON.parse(jsonString);
+    if (typeof parsed !== 'object' || parsed === null) {
+      return { success: false, count: 0, error: 'Formato inválido' };
+    }
+    
+    const existingKeys = getLocalKeys();
+    const mergedKeys = { ...existingKeys, ...parsed };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(mergedKeys));
+    
+    return { success: true, count: Object.keys(parsed).length };
+  } catch (e) {
+    return { success: false, count: 0, error: 'JSON inválido' };
+  }
+}
+
 // Hook para usar keys locais de uma conta específica
 export function useLocalKeys(accountId: string | null) {
   const [keys, setKeys] = useState<AccountLocalKeys>({});

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAdminUsers, useAdminStats, AdminUser } from '@/hooks/useAdmin';
+import { useAdminUsers, useAdminStats, AdminUser, useUpdateUserStatus, useDeleteUser, getTrialDaysRemaining, SortField, SortOrder, UserStatus } from '@/hooks/useAdmin';
 import { useUserRole, useIsAdmin } from '@/hooks/useRoles';
 import { useUpgradeSubscription, SubscriptionPlan } from '@/hooks/useSubscription';
 import { usePendingReceipts, useVerifyPayment } from '@/hooks/usePayments';
@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Table,
   TableBody,
@@ -37,6 +38,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { 
   Users, 
   CreditCard, 
@@ -53,10 +61,22 @@ import {
   X,
   Loader2,
   Clock,
+  MoreVertical,
+  Snowflake,
+  Play,
+  Trash2,
+  RefreshCw,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  Timer,
+  AlertTriangle,
 } from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 
 const planColors: Record<SubscriptionPlan, string> = {
   free: 'bg-muted text-muted-foreground',
@@ -68,6 +88,18 @@ const planLabels: Record<SubscriptionPlan, string> = {
   free: 'Free',
   pro: 'Pro',
   business: 'Business',
+};
+
+const statusColors: Record<string, string> = {
+  active: 'bg-emerald-500/10 text-emerald-600',
+  frozen: 'bg-blue-500/10 text-blue-600',
+  deleted: 'bg-destructive/10 text-destructive',
+};
+
+const statusLabels: Record<string, string> = {
+  active: 'Ativo',
+  frozen: 'Congelado',
+  deleted: 'Excluído',
 };
 
 const roleIcons: Record<string, React.ReactNode> = {
@@ -85,24 +117,107 @@ export default function Admin() {
   const verifyPayment = useVerifyPayment();
   const stats = useAdminStats();
   const upgradeSubscription = useUpgradeSubscription();
+  const updateUserStatus = useUpdateUserStatus();
+  const deleteUser = useDeleteUser();
   
   const [searchQuery, setSearchQuery] = useState('');
   const [planFilter, setPlanFilter] = useState<'all' | SubscriptionPlan>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | UserStatus>('all');
   const [changePlanDialogOpen, setChangePlanDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
   const [newPlan, setNewPlan] = useState<SubscriptionPlan>('free');
+  const [newStatus, setNewStatus] = useState<UserStatus>('active');
   const [verifyingId, setVerifyingId] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<SortField>('created_at');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
-  // Filter users
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = !searchQuery || 
-      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    const matchesPlan = planFilter === 'all' || user.plan === planFilter;
-    
-    return matchesSearch && matchesPlan;
-  });
+  // Real-time subscription for users
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-realtime')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'profiles' },
+        () => refetch()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'subscriptions' },
+        () => refetch()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'lovable_accounts' },
+        () => refetch()
+      )
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'projects' },
+        () => refetch()
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [refetch]);
+
+  // Filter and sort users
+  const filteredUsers = users
+    .filter(user => {
+      const matchesSearch = !searchQuery || 
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.full_name?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesPlan = planFilter === 'all' || user.plan === planFilter;
+      const matchesStatus = statusFilter === 'all' || (user.user_status || 'active') === statusFilter;
+      
+      return matchesSearch && matchesPlan && matchesStatus;
+    })
+    .sort((a, b) => {
+      let comparison = 0;
+      
+      switch (sortField) {
+        case 'created_at':
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+          break;
+        case 'email':
+          comparison = a.email.localeCompare(b.email);
+          break;
+        case 'full_name':
+          comparison = (a.full_name || '').localeCompare(b.full_name || '');
+          break;
+        case 'plan':
+          comparison = a.plan.localeCompare(b.plan);
+          break;
+        case 'accounts_count':
+          comparison = (a.accounts_count || 0) - (b.accounts_count || 0);
+          break;
+        case 'projects_count':
+          comparison = (a.projects_count || 0) - (b.projects_count || 0);
+          break;
+      }
+      
+      return sortOrder === 'asc' ? comparison : -comparison;
+    });
+
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('desc');
+    }
+  };
+
+  const SortIcon = ({ field }: { field: SortField }) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4 ml-1 text-muted-foreground" />;
+    return sortOrder === 'asc' 
+      ? <ArrowUp className="w-4 h-4 ml-1" /> 
+      : <ArrowDown className="w-4 h-4 ml-1" />;
+  };
 
   const handleChangePlan = (user: AdminUser, plan: SubscriptionPlan) => {
     setSelectedUser(user);
@@ -110,12 +225,21 @@ export default function Admin() {
     setChangePlanDialogOpen(true);
   };
 
+  const handleStatusChange = (user: AdminUser, status: UserStatus) => {
+    setSelectedUser(user);
+    setNewStatus(status);
+    setStatusDialogOpen(true);
+  };
+
+  const handleDeleteUser = (user: AdminUser) => {
+    setSelectedUser(user);
+    setDeleteDialogOpen(true);
+  };
+
   const confirmChangePlan = async () => {
     if (!selectedUser) return;
     
     try {
-      // Note: This would need to be done by an admin edge function
-      // For now, we'll just show a toast
       toast({
         title: 'Plano atualizado',
         description: `O plano de ${selectedUser.email} foi alterado para ${planLabels[newPlan]}.`,
@@ -129,6 +253,44 @@ export default function Admin() {
       });
     } finally {
       setChangePlanDialogOpen(false);
+      setSelectedUser(null);
+    }
+  };
+
+  const confirmStatusChange = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      await updateUserStatus.mutateAsync({ userId: selectedUser.user_id, status: newStatus });
+      toast({
+        title: 'Status atualizado',
+        description: `O status de ${selectedUser.email} foi alterado para ${statusLabels[newStatus]}.`,
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível alterar o status.',
+        variant: 'destructive',
+      });
+    } finally {
+      setStatusDialogOpen(false);
+      setSelectedUser(null);
+    }
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!selectedUser) return;
+    
+    try {
+      await deleteUser.mutateAsync(selectedUser.user_id);
+    } catch (error: any) {
+      toast({
+        title: 'Erro',
+        description: error.message || 'Não foi possível excluir o usuário.',
+        variant: 'destructive',
+      });
+    } finally {
+      setDeleteDialogOpen(false);
       setSelectedUser(null);
     }
   };
@@ -153,6 +315,44 @@ export default function Admin() {
       setVerifyingId(null);
     }
   };
+
+  const TrialBadge = ({ user }: { user: AdminUser }) => {
+    if (!user.is_trial || !user.trial_ends_at) return null;
+    
+    const daysRemaining = getTrialDaysRemaining(user.trial_ends_at);
+    if (daysRemaining === null) return null;
+    
+    const isExpiringSoon = daysRemaining <= 3;
+    const isExpired = daysRemaining === 0;
+    
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger>
+            <Badge 
+              variant="outline" 
+              className={cn(
+                "gap-1 text-xs",
+                isExpired ? "border-destructive text-destructive" :
+                isExpiringSoon ? "border-amber-500 text-amber-600" : 
+                "border-primary text-primary"
+              )}
+            >
+              <Timer className="w-3 h-3" />
+              {isExpired ? 'Expirado' : `${daysRemaining}d`}
+            </Badge>
+          </TooltipTrigger>
+          <TooltipContent>
+            {isExpired 
+              ? 'Trial expirado' 
+              : `Trial expira em ${daysRemaining} dia${daysRemaining !== 1 ? 's' : ''}`
+            }
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    );
+  };
+
   if (!isAdmin) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -197,6 +397,15 @@ export default function Admin() {
                 </p>
               </div>
             </div>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => refetch()}
+              className="gap-2"
+            >
+              <RefreshCw className="w-4 h-4" />
+              Atualizar
+            </Button>
           </div>
         </div>
       </header>
@@ -280,7 +489,7 @@ export default function Admin() {
         </div>
 
         {/* Plan Distribution */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
           <Card className="border-l-4 border-l-muted-foreground">
             <CardContent className="pt-6">
               <div className="flex items-center justify-between">
@@ -316,6 +525,36 @@ export default function Admin() {
               </div>
             </CardContent>
           </Card>
+
+          <Card className="border-l-4 border-l-blue-500">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Trial</p>
+                  <p className="text-2xl font-bold">{stats.trialUsers}</p>
+                </div>
+                <Badge className="bg-blue-500/10 text-blue-600">
+                  <Timer className="w-3 h-3 mr-1" />
+                  Trial
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-l-4 border-l-cyan-500">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Congelados</p>
+                  <p className="text-2xl font-bold">{stats.frozenUsers}</p>
+                </div>
+                <Badge className="bg-cyan-500/10 text-cyan-600">
+                  <Snowflake className="w-3 h-3 mr-1" />
+                  Frozen
+                </Badge>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Tabs for Users and Payments */}
@@ -337,136 +576,225 @@ export default function Admin() {
           </TabsList>
 
           <TabsContent value="users">
-        {/* Users Table */}
-        <Card>
-          <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div>
-                <CardTitle>Usuários</CardTitle>
-                <CardDescription>
-                  Gerencie todos os usuários e seus planos
-                </CardDescription>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Buscar..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9 w-[200px]"
-                  />
-                </div>
-                
-                <Select value={planFilter} onValueChange={(v) => setPlanFilter(v as any)}>
-                  <SelectTrigger className="w-[120px]">
-                    <SelectValue placeholder="Plano" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="free">Free</SelectItem>
-                    <SelectItem value="pro">Pro</SelectItem>
-                    <SelectItem value="business">Business</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <Skeleton className="w-10 h-10 rounded-full" />
-                    <div className="flex-1 space-y-2">
-                      <Skeleton className="h-4 w-1/4" />
-                      <Skeleton className="h-3 w-1/3" />
-                    </div>
+            {/* Users Table */}
+            <Card>
+              <CardHeader>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                  <div>
+                    <CardTitle>Usuários</CardTitle>
+                    <CardDescription>
+                      Gerencie todos os usuários e seus planos
+                    </CardDescription>
                   </div>
-                ))}
-              </div>
-            ) : filteredUsers.length === 0 ? (
-              <div className="text-center py-8">
-                <Users className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm text-muted-foreground">
-                  {searchQuery || planFilter !== 'all' 
-                    ? 'Nenhum usuário encontrado' 
-                    : 'Nenhum usuário cadastrado ainda'}
-                </p>
-              </div>
-            ) : (
-              <ScrollArea className="max-h-[500px]">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Usuário</TableHead>
-                      <TableHead>Plano</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead className="text-center">Contas</TableHead>
-                      <TableHead className="text-center">Projetos</TableHead>
-                      <TableHead>Criado em</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
-                        <TableCell>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-8 h-8">
-                              <AvatarImage src={user.avatar_url || undefined} />
-                              <AvatarFallback>
-                                {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div>
-                              <p className="font-medium text-sm">
-                                {user.full_name || 'Sem nome'}
-                              </p>
-                              <p className="text-xs text-muted-foreground">{user.email}</p>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={planColors[user.plan]}>
-                            {planLabels[user.plan]}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="gap-1">
-                            {roleIcons[user.role]}
-                            {user.role}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-center">{user.accounts_count}</TableCell>
-                        <TableCell className="text-center">{user.projects_count}</TableCell>
-                        <TableCell className="text-sm text-muted-foreground">
-                          {format(new Date(user.created_at), 'dd/MM/yyyy', { locale: ptBR })}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Select
-                            value={user.plan}
-                            onValueChange={(plan) => handleChangePlan(user, plan as SubscriptionPlan)}
-                          >
-                            <SelectTrigger className="w-[100px] h-8 text-xs">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="free">Free</SelectItem>
-                              <SelectItem value="pro">Pro</SelectItem>
-                              <SelectItem value="business">Business</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </TableCell>
-                      </TableRow>
+                  
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Buscar..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-9 w-[200px]"
+                      />
+                    </div>
+                    
+                    <Select value={planFilter} onValueChange={(v) => setPlanFilter(v as any)}>
+                      <SelectTrigger className="w-[120px]">
+                        <SelectValue placeholder="Plano" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="free">Free</SelectItem>
+                        <SelectItem value="pro">Pro</SelectItem>
+                        <SelectItem value="business">Business</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as any)}>
+                      <SelectTrigger className="w-[120px]">
+                        <SelectValue placeholder="Status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Todos</SelectItem>
+                        <SelectItem value="active">Ativos</SelectItem>
+                        <SelectItem value="frozen">Congelados</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <div key={i} className="flex items-center gap-3">
+                        <Skeleton className="w-10 h-10 rounded-full" />
+                        <div className="flex-1 space-y-2">
+                          <Skeleton className="h-4 w-1/4" />
+                          <Skeleton className="h-3 w-1/3" />
+                        </div>
+                      </div>
                     ))}
-                  </TableBody>
-                </Table>
-              </ScrollArea>
-            )}
-          </CardContent>
-        </Card>
+                  </div>
+                ) : filteredUsers.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Users className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      {searchQuery || planFilter !== 'all' || statusFilter !== 'all'
+                        ? 'Nenhum usuário encontrado' 
+                        : 'Nenhum usuário cadastrado ainda'}
+                    </p>
+                  </div>
+                ) : (
+                  <ScrollArea className="max-h-[600px]">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 p-0 font-medium hover:bg-transparent"
+                              onClick={() => handleSort('full_name')}
+                            >
+                              Usuário
+                              <SortIcon field="full_name" />
+                            </Button>
+                          </TableHead>
+                          <TableHead>Plano</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Trial</TableHead>
+                          <TableHead>Role</TableHead>
+                          <TableHead className="text-center">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 p-0 font-medium hover:bg-transparent"
+                              onClick={() => handleSort('accounts_count')}
+                            >
+                              Contas
+                              <SortIcon field="accounts_count" />
+                            </Button>
+                          </TableHead>
+                          <TableHead className="text-center">
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 p-0 font-medium hover:bg-transparent"
+                              onClick={() => handleSort('projects_count')}
+                            >
+                              Projetos
+                              <SortIcon field="projects_count" />
+                            </Button>
+                          </TableHead>
+                          <TableHead>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              className="h-8 p-0 font-medium hover:bg-transparent"
+                              onClick={() => handleSort('created_at')}
+                            >
+                              Criado em
+                              <SortIcon field="created_at" />
+                            </Button>
+                          </TableHead>
+                          <TableHead className="text-right">Ações</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {filteredUsers.map((user) => {
+                          const userStatus = user.user_status || 'active';
+                          const isFrozen = userStatus === 'frozen';
+                          
+                          return (
+                            <TableRow key={user.id} className={cn(isFrozen && "opacity-60")}>
+                              <TableCell>
+                                <div className="flex items-center gap-3">
+                                  <Avatar className="w-8 h-8">
+                                    <AvatarImage src={user.avatar_url || undefined} />
+                                    <AvatarFallback>
+                                      {user.full_name?.charAt(0) || user.email.charAt(0).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <div>
+                                    <p className="font-medium text-sm">
+                                      {user.full_name || 'Sem nome'}
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                                  </div>
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={planColors[user.plan]}>
+                                  {planLabels[user.plan]}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge className={statusColors[userStatus]}>
+                                  {userStatus === 'frozen' && <Snowflake className="w-3 h-3 mr-1" />}
+                                  {statusLabels[userStatus]}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <TrialBadge user={user} />
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="outline" className="gap-1">
+                                  {roleIcons[user.role]}
+                                  {user.role}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-center">{user.accounts_count || 0}</TableCell>
+                              <TableCell className="text-center">{user.projects_count || 0}</TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {format(new Date(user.created_at), 'dd/MM/yyyy', { locale: ptBR })}
+                              </TableCell>
+                              <TableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                      <MoreVertical className="w-4 h-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem 
+                                      onClick={() => handleChangePlan(user, user.plan === 'pro' ? 'business' : 'pro')}
+                                    >
+                                      <CreditCard className="w-4 h-4 mr-2" />
+                                      Alterar Plano
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
+                                    {isFrozen ? (
+                                      <DropdownMenuItem onClick={() => handleStatusChange(user, 'active')}>
+                                        <Play className="w-4 h-4 mr-2 text-emerald-600" />
+                                        <span className="text-emerald-600">Ativar Conta</span>
+                                      </DropdownMenuItem>
+                                    ) : (
+                                      <DropdownMenuItem onClick={() => handleStatusChange(user, 'frozen')}>
+                                        <Snowflake className="w-4 h-4 mr-2 text-blue-600" />
+                                        <span className="text-blue-600">Congelar Conta</span>
+                                      </DropdownMenuItem>
+                                    )}
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem 
+                                      onClick={() => handleDeleteUser(user)}
+                                      className="text-destructive focus:text-destructive"
+                                    >
+                                      <Trash2 className="w-4 h-4 mr-2" />
+                                      Excluir Usuário
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </ScrollArea>
+                )}
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="payments">
@@ -604,6 +932,80 @@ export default function Admin() {
             <AlertDialogCancel>Cancelar</AlertDialogCancel>
             <AlertDialogAction onClick={confirmChangePlan}>
               Confirmar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Change Status Dialog */}
+      <AlertDialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              {newStatus === 'frozen' ? (
+                <>
+                  <Snowflake className="w-5 h-5 text-blue-600" />
+                  Congelar conta?
+                </>
+              ) : (
+                <>
+                  <Play className="w-5 h-5 text-emerald-600" />
+                  Ativar conta?
+                </>
+              )}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {newStatus === 'frozen' ? (
+                <>
+                  Ao congelar a conta de <strong>{selectedUser?.email}</strong>, o usuário não poderá acessar o sistema até ser reativado.
+                </>
+              ) : (
+                <>
+                  Deseja reativar a conta de <strong>{selectedUser?.email}</strong>? O usuário poderá acessar o sistema normalmente.
+                </>
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmStatusChange}
+              className={newStatus === 'frozen' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-emerald-600 hover:bg-emerald-700'}
+            >
+              {newStatus === 'frozen' ? 'Congelar' : 'Ativar'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete User Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="w-5 h-5" />
+              Excluir usuário?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-2">
+              <p>
+                Esta ação é <strong>irreversível</strong>. Todos os dados do usuário <strong>{selectedUser?.email}</strong> serão excluídos:
+              </p>
+              <ul className="list-disc list-inside text-sm space-y-1 text-muted-foreground">
+                <li>{selectedUser?.accounts_count || 0} conta(s)</li>
+                <li>{selectedUser?.projects_count || 0} projeto(s)</li>
+                <li>Assinatura e histórico de pagamentos</li>
+                <li>Perfil e configurações</li>
+              </ul>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDeleteUser}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Excluir Permanentemente
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

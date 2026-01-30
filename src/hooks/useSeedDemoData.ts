@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './useAuth';
+import { toast } from 'sonner';
 
 const demoAccount = {
   name: 'Conta Demonstração',
@@ -21,7 +22,7 @@ const demoProjects = [
     is_favorite: true,
     notes: 'Projeto exemplo para demonstrar funcionalidades do painel.',
     view_count: 245,
-    deadline: null, // Completed, no deadline
+    deadline: null,
   },
   {
     name: 'Landing Page Startup',
@@ -33,7 +34,7 @@ const demoProjects = [
     progress: 100,
     is_favorite: false,
     view_count: 189,
-    deadline: null, // Completed, no deadline
+    deadline: null,
   },
   {
     name: 'Dashboard Analytics',
@@ -46,7 +47,7 @@ const demoProjects = [
     is_favorite: false,
     notes: 'Em desenvolvimento - falta integrar API de dados.',
     view_count: 67,
-    deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(), // 2 days overdue
+    deadline: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
   },
   {
     name: 'Funil de Vendas Curso',
@@ -59,7 +60,7 @@ const demoProjects = [
     is_favorite: false,
     notes: 'Precisa finalizar urgente!',
     view_count: 1024,
-    deadline: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(), // 5 days overdue
+    deadline: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
   },
 ];
 
@@ -81,47 +82,84 @@ export function useSeedDemoData() {
     setSeeding(true);
     
     try {
-      // Check if user already has data
-      const { data: existingAccounts } = await supabase
-        .from('lovable_accounts')
+      // Check if user already has projects (not just accounts)
+      const { data: existingProjects } = await supabase
+        .from('projects')
         .select('id')
         .eq('user_id', user.id)
         .limit(1);
 
-      if (existingAccounts && existingAccounts.length > 0) {
-        console.log('User already has data, skipping seed');
+      if (existingProjects && existingProjects.length > 0) {
+        console.log('User already has projects, skipping seed');
         setSeeding(false);
         return false;
       }
 
-      // Create demo account
-      const { data: account, error: accountError } = await supabase
+      // Check if demo account exists, if not create it
+      let accountId: string;
+      const { data: existingDemoAccount } = await supabase
         .from('lovable_accounts')
-        .insert({
-          ...demoAccount,
-          user_id: user.id,
-        })
-        .select()
-        .single();
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('name', 'Conta Demonstração')
+        .maybeSingle();
 
-      if (accountError) throw accountError;
+      if (existingDemoAccount) {
+        accountId = existingDemoAccount.id;
+        console.log('Demo account exists, using it:', accountId);
+      } else {
+        // Create demo account
+        const { data: account, error: accountError } = await supabase
+          .from('lovable_accounts')
+          .insert({
+            ...demoAccount,
+            user_id: user.id,
+          })
+          .select()
+          .single();
 
-      // Create demo tags
-      const { data: tags, error: tagsError } = await supabase
+        if (accountError) {
+          console.error('Error creating demo account:', accountError);
+          throw accountError;
+        }
+        accountId = account.id;
+        console.log('Created demo account:', accountId);
+      }
+
+      // Create demo tags (if not exist)
+      const { data: existingTags } = await supabase
         .from('tags')
-        .insert(demoTags.map(tag => ({
-          ...tag,
-          user_id: user.id,
-        })))
-        .select();
+        .select('id, name')
+        .eq('user_id', user.id)
+        .in('name', demoTags.map(t => t.name));
 
-      if (tagsError) throw tagsError;
+      const existingTagNames = existingTags?.map(t => t.name) || [];
+      const newTags = demoTags.filter(t => !existingTagNames.includes(t.name));
+
+      let allTags = existingTags || [];
+
+      if (newTags.length > 0) {
+        const { data: createdTags, error: tagsError } = await supabase
+          .from('tags')
+          .insert(newTags.map(tag => ({
+            ...tag,
+            user_id: user.id,
+          })))
+          .select();
+
+        if (tagsError) {
+          console.error('Error creating tags:', tagsError);
+          // Continue without tags if there's an error
+        } else if (createdTags) {
+          allTags = [...allTags, ...createdTags];
+        }
+      }
 
       // Create demo projects
       const projectsToInsert = demoProjects.map(project => ({
         ...project,
         user_id: user.id,
-        account_id: account.id,
+        account_id: accountId,
       }));
 
       const { data: projects, error: projectsError } = await supabase
@@ -129,36 +167,56 @@ export function useSeedDemoData() {
         .insert(projectsToInsert)
         .select();
 
-      if (projectsError) throw projectsError;
+      if (projectsError) {
+        console.error('Error creating projects:', projectsError);
+        throw projectsError;
+      }
+
+      console.log('Created projects:', projects?.length);
 
       // Link tags to projects
-      if (projects && tags) {
+      if (projects && allTags.length > 0) {
+        const tagsByName: Record<string, { id: string }> = {};
+        allTags.forEach(t => {
+          tagsByName[t.name] = t;
+        });
+
         const projectTagLinks = [
-          { project: projects[0], tags: [tags[0], tags[3]] }, // E-commerce + SaaS
-          { project: projects[1], tags: [tags[1]] }, // Landing Page
-          { project: projects[2], tags: [tags[2], tags[3]] }, // Dashboard + SaaS
-          { project: projects[3], tags: [tags[1]] }, // Landing Page (funnel)
+          { project: projects[0], tagNames: ['E-commerce', 'SaaS'] },
+          { project: projects[1], tagNames: ['Landing Page'] },
+          { project: projects[2], tagNames: ['Dashboard', 'SaaS'] },
+          { project: projects[3], tagNames: ['Landing Page'] },
         ];
 
         for (const link of projectTagLinks) {
           if (link.project) {
-            await supabase
-              .from('project_tags')
-              .insert(
-                link.tags.map(tag => ({
-                  project_id: link.project.id,
-                  tag_id: tag.id,
-                }))
-              );
+            const validTagIds = link.tagNames
+              .filter(name => tagsByName[name])
+              .map(name => tagsByName[name].id);
+
+            if (validTagIds.length > 0) {
+              await supabase
+                .from('project_tags')
+                .insert(
+                  validTagIds.map(tagId => ({
+                    project_id: link.project.id,
+                    tag_id: tagId,
+                  }))
+                );
+            }
           }
         }
       }
 
       console.log('Demo data seeded successfully');
+      toast.success('Projetos de demonstração criados!', {
+        description: '4 projetos de exemplo foram adicionados ao seu painel.'
+      });
       setSeeding(false);
       return true;
     } catch (error) {
       console.error('Error seeding demo data:', error);
+      toast.error('Erro ao criar projetos de demonstração');
       setSeeding(false);
       return false;
     }
@@ -201,10 +259,12 @@ export function useSeedDemoData() {
         .in('name', demoTagNames);
 
       console.log('Demo data cleared successfully');
+      toast.success('Dados de demonstração removidos');
       setClearing(false);
       return true;
     } catch (error) {
       console.error('Error clearing demo data:', error);
+      toast.error('Erro ao remover dados de demonstração');
       setClearing(false);
       return false;
     }
@@ -223,10 +283,32 @@ export function useSeedDemoData() {
     return !!data;
   }, [user?.id]);
 
+  const hasDemoProjects = useCallback(async () => {
+    if (!user?.id) return false;
+    
+    const { data: demoAccountData } = await supabase
+      .from('lovable_accounts')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('name', 'Conta Demonstração')
+      .maybeSingle();
+    
+    if (!demoAccountData) return false;
+
+    const { data: projects } = await supabase
+      .from('projects')
+      .select('id')
+      .eq('account_id', demoAccountData.id)
+      .limit(1);
+    
+    return projects && projects.length > 0;
+  }, [user?.id]);
+
   return {
     seedDemoData,
     clearDemoData,
     hasDemoAccount,
+    hasDemoProjects,
     seeding,
     clearing,
   };

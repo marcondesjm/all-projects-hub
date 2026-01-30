@@ -9,6 +9,48 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2, FolderKanban } from 'lucide-react';
 
+const getErrorMessage = (error: { message: string }) => {
+  const msg = error.message.toLowerCase();
+  
+  if (msg.includes('user already registered') || msg.includes('already been registered')) {
+    return {
+      title: 'Email já cadastrado',
+      description: 'Este email já possui uma conta. Tente fazer login ou use outro email.',
+      suggestLogin: true
+    };
+  }
+  
+  if (msg.includes('invalid login credentials') || msg.includes('invalid credentials')) {
+    return {
+      title: 'Credenciais inválidas',
+      description: 'Email ou senha incorretos. Verifique e tente novamente.',
+      suggestLogin: false
+    };
+  }
+  
+  if (msg.includes('email not confirmed')) {
+    return {
+      title: 'Email não confirmado',
+      description: 'Verifique seu email e clique no link de confirmação.',
+      suggestLogin: false
+    };
+  }
+  
+  if (msg.includes('password')) {
+    return {
+      title: 'Senha inválida',
+      description: 'A senha deve ter no mínimo 6 caracteres.',
+      suggestLogin: false
+    };
+  }
+  
+  return {
+    title: 'Erro',
+    description: error.message,
+    suggestLogin: false
+  };
+};
+
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
   const { signIn, signUp } = useAuth();
@@ -21,6 +63,7 @@ export default function Auth() {
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPassword, setSignupPassword] = useState('');
   const [signupName, setSignupName] = useState('');
+  const [activeTab, setActiveTab] = useState('login');
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,9 +72,10 @@ export default function Auth() {
     const { error } = await signIn(loginEmail, loginPassword);
 
     if (error) {
+      const errorInfo = getErrorMessage(error);
       toast({
-        title: 'Erro ao entrar',
-        description: error.message,
+        title: errorInfo.title,
+        description: errorInfo.description,
         variant: 'destructive',
       });
     } else {
@@ -52,16 +96,29 @@ export default function Auth() {
     const { error } = await signUp(signupEmail, signupPassword, signupName);
 
     if (error) {
+      const errorInfo = getErrorMessage(error);
       toast({
-        title: 'Erro ao criar conta',
-        description: error.message,
+        title: errorInfo.title,
+        description: errorInfo.description,
         variant: 'destructive',
       });
+      
+      // Se o usuário já existe, sugerir fazer login
+      if (errorInfo.suggestLogin) {
+        setLoginEmail(signupEmail);
+        setActiveTab('login');
+        toast({
+          title: 'Faça login',
+          description: 'Redirecionamos você para a tela de login.',
+        });
+      }
     } else {
       toast({
         title: 'Conta criada!',
-        description: 'Verifique seu email para confirmar o cadastro.',
+        description: 'Você já pode fazer login.',
       });
+      setLoginEmail(signupEmail);
+      setActiveTab('login');
     }
 
     setIsLoading(false);
@@ -82,7 +139,7 @@ export default function Auth() {
         </div>
 
         <Card className="border-border/50 shadow-sm">
-          <Tabs defaultValue="login" className="w-full">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <CardHeader className="pb-3 pt-4">
               <TabsList className="grid w-full grid-cols-2 h-9">
                 <TabsTrigger value="login" className="text-sm">Entrar</TabsTrigger>

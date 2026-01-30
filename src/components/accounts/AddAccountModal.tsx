@@ -7,13 +7,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { useCreateAccount } from '@/hooks/useProjects';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Coins } from 'lucide-react';
+import { Loader2, Coins, Key, Globe, User, Mail, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 
 interface AddAccountModalProps {
   open: boolean;
@@ -31,7 +39,13 @@ const colors = [
 export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [adminEmail, setAdminEmail] = useState('');
   const [credits, setCredits] = useState('');
+  const [supabaseProjectId, setSupabaseProjectId] = useState('');
+  const [supabaseUrl, setSupabaseUrl] = useState('');
+  const [anonKey, setAnonKey] = useState('');
+  const [serviceRoleKey, setServiceRoleKey] = useState('');
+  const [notes, setNotes] = useState('');
   const [selectedColor, setSelectedColor] = useState<'blue' | 'emerald' | 'amber' | 'rose' | 'violet'>('blue');
   
   const createAccount = useCreateAccount();
@@ -63,8 +77,14 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
       await createAccount.mutateAsync({
         name: name.trim(),
         email: email.trim(),
+        admin_email: adminEmail.trim() || null,
         color: selectedColor,
         credits: creditsValue,
+        supabase_project_id: supabaseProjectId.trim() || null,
+        supabase_url: supabaseUrl.trim() || null,
+        anon_key: anonKey.trim() || null,
+        service_role_key: serviceRoleKey.trim() || null,
+        notes: notes.trim() || null,
       });
       
       toast({
@@ -75,7 +95,13 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
       // Reset form
       setName('');
       setEmail('');
+      setAdminEmail('');
       setCredits('');
+      setSupabaseProjectId('');
+      setSupabaseUrl('');
+      setAnonKey('');
+      setServiceRoleKey('');
+      setNotes('');
       setSelectedColor('blue');
       onOpenChange(false);
     } catch (error: any) {
@@ -89,98 +115,205 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Adicionar Conta Lovable</DialogTitle>
           <DialogDescription>
-            Adicione uma nova conta Lovable para organizar seus projetos.
+            Adicione uma nova conta Lovable com informações do projeto Supabase.
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="account-name">Nome da conta</Label>
-            <Input
-              id="account-name"
-              placeholder="Ex: Projetos Pessoais"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="account-email">Email da conta Lovable</Label>
-            <Input
-              id="account-email"
-              type="email"
-              placeholder="email@exemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="account-credits" className="flex items-center gap-2">
-              <Coins className="w-4 h-4" />
-              Créditos disponíveis
-            </Label>
-            <Input
-              id="account-credits"
-              type="number"
-              min="0"
-              placeholder="0"
-              value={credits}
-              onChange={(e) => setCredits(e.target.value)}
-            />
-            <p className="text-xs text-muted-foreground">
-              Quantidade de créditos Lovable disponíveis nesta conta.
-            </p>
-          </div>
-          
-          <div className="space-y-2">
-            <Label>Cor de identificação</Label>
-            <div className="flex gap-2">
-              {colors.map((color) => (
-                <button
-                  key={color.id}
-                  type="button"
-                  onClick={() => setSelectedColor(color.id)}
-                  className={cn(
-                    'w-8 h-8 rounded-full transition-all duration-200',
-                    color.class,
-                    selectedColor === color.id 
-                      ? 'ring-2 ring-offset-2 ring-primary scale-110' 
-                      : 'hover:scale-105'
-                  )}
-                  title={color.label}
+        <ScrollArea className="flex-1 pr-4">
+          <form onSubmit={handleSubmit} className="space-y-4 pb-4">
+            {/* Informações Básicas */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="account-name" className="flex items-center gap-2">
+                  <User className="w-4 h-4" />
+                  Nome da conta *
+                </Label>
+                <Input
+                  id="account-name"
+                  placeholder="Ex: Projetos Pessoais"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  required
                 />
-              ))}
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="account-email" className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Email de cadastro Lovable *
+                </Label>
+                <Input
+                  id="account-email"
+                  type="email"
+                  placeholder="email@exemplo.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="admin-email" className="flex items-center gap-2">
+                  <Mail className="w-4 h-4" />
+                  Email de administrador
+                </Label>
+                <Input
+                  id="admin-email"
+                  type="email"
+                  placeholder="admin@exemplo.com"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="account-credits" className="flex items-center gap-2">
+                  <Coins className="w-4 h-4" />
+                  Créditos disponíveis
+                </Label>
+                <Input
+                  id="account-credits"
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={credits}
+                  onChange={(e) => setCredits(e.target.value)}
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Cor de identificação</Label>
+                <div className="flex gap-2">
+                  {colors.map((color) => (
+                    <button
+                      key={color.id}
+                      type="button"
+                      onClick={() => setSelectedColor(color.id)}
+                      className={cn(
+                        'w-8 h-8 rounded-full transition-all duration-200',
+                        color.class,
+                        selectedColor === color.id 
+                          ? 'ring-2 ring-offset-2 ring-primary scale-110' 
+                          : 'hover:scale-105'
+                      )}
+                      title={color.label}
+                    />
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-          
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={createAccount.isPending}
-            >
-              Cancelar
-            </Button>
-            <Button type="submit" disabled={createAccount.isPending}>
-              {createAccount.isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adicionando...
-                </>
-              ) : (
-                'Adicionar Conta'
-              )}
-            </Button>
-          </DialogFooter>
-        </form>
+
+            {/* Configurações Supabase (Accordion) */}
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="supabase">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="flex items-center gap-2">
+                    <Globe className="w-4 h-4" />
+                    Configurações Supabase (opcional)
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="supabase-project-id">Project ID</Label>
+                    <Input
+                      id="supabase-project-id"
+                      placeholder="Ex: abcdefghijklmnop"
+                      value={supabaseProjectId}
+                      onChange={(e) => setSupabaseProjectId(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="supabase-url">URL do Projeto</Label>
+                    <Input
+                      id="supabase-url"
+                      placeholder="https://xxx.supabase.co"
+                      value={supabaseUrl}
+                      onChange={(e) => setSupabaseUrl(e.target.value)}
+                    />
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="keys">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="flex items-center gap-2">
+                    <Key className="w-4 h-4" />
+                    API Keys (opcional)
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="space-y-4 pt-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="anon-key">Anon Key (Pública)</Label>
+                    <Input
+                      id="anon-key"
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp..."
+                      value={anonKey}
+                      onChange={(e) => setAnonKey(e.target.value)}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="service-role-key">Service Role Key (Privada)</Label>
+                    <Input
+                      id="service-role-key"
+                      type="password"
+                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp..."
+                      value={serviceRoleKey}
+                      onChange={(e) => setServiceRoleKey(e.target.value)}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      ⚠️ Mantenha esta chave em segredo. Nunca compartilhe publicamente.
+                    </p>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="notes">
+                <AccordionTrigger className="text-sm font-medium">
+                  <span className="flex items-center gap-2">
+                    <FileText className="w-4 h-4" />
+                    Notas e observações (opcional)
+                  </span>
+                </AccordionTrigger>
+                <AccordionContent className="pt-2">
+                  <Textarea
+                    id="notes"
+                    placeholder="Adicione notas, observações ou informações adicionais sobre esta conta..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={4}
+                  />
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+            
+            <DialogFooter className="pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+                disabled={createAccount.isPending}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={createAccount.isPending}>
+                {createAccount.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Adicionando...
+                  </>
+                ) : (
+                  'Adicionar Conta'
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

@@ -101,6 +101,12 @@ export function ImportBackupButton({
             email: account.email,
             color: account.color || 'blue',
             credits: account.credits || 0,
+            admin_email: account.admin_email || null,
+            supabase_project_id: account.supabase_project_id || null,
+            supabase_url: account.supabase_url || null,
+            anon_key: account.anon_key || null,
+            service_role_key: account.service_role_key || null,
+            notes: account.notes || null,
           });
           accountIdMap.set(account.id, result.id);
           accountsImported++;

@@ -12,6 +12,12 @@ export interface LovableAccount {
   credits_updated_at: string;
   created_at: string;
   updated_at: string;
+  admin_email: string | null;
+  supabase_project_id: string | null;
+  supabase_url: string | null;
+  anon_key: string | null;
+  service_role_key: string | null;
+  notes: string | null;
 }
 
 export interface Tag {

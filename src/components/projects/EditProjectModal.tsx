@@ -18,12 +18,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUpdateProject, useAccounts, useTags, Project } from '@/hooks/useProjects';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, X } from 'lucide-react';
+import { Loader2, X, FileEdit, History } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { CoverUpload } from './CoverUpload';
+import { DeadlinePicker } from './DeadlinePicker';
+import { ProjectHistoryPanel } from './ProjectHistoryPanel';
 
 interface EditProjectModalProps {
   open: boolean;
@@ -66,6 +69,7 @@ export function EditProjectModal({ open, onOpenChange, project }: EditProjectMod
   const [status, setStatus] = useState<'published' | 'draft' | 'archived'>('draft');
   const [notes, setNotes] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [deadline, setDeadline] = useState<Date | null>(null);
   
   const { data: accounts = [] } = useAccounts();
   const { data: tags = [] } = useTags();
@@ -83,6 +87,7 @@ export function EditProjectModal({ open, onOpenChange, project }: EditProjectMod
       setStatus(project.status as typeof status);
       setNotes(project.notes || '');
       setSelectedTags(project.tags?.map(t => t.id) || []);
+      setDeadline(project.deadline ? new Date(project.deadline) : null);
     }
   }, [project]);
 
@@ -110,6 +115,7 @@ export function EditProjectModal({ open, onOpenChange, project }: EditProjectMod
         status,
         notes: notes.trim() || null,
         tagIds: selectedTags,
+        deadline: deadline?.toISOString() || null,
       });
       
       toast({
@@ -143,7 +149,7 @@ export function EditProjectModal({ open, onOpenChange, project }: EditProjectMod
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Editar Projeto</DialogTitle>
           <DialogDescription>
@@ -151,7 +157,20 @@ export function EditProjectModal({ open, onOpenChange, project }: EditProjectMod
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="details" className="gap-2">
+              <FileEdit className="h-4 w-4" />
+              Detalhes
+            </TabsTrigger>
+            <TabsTrigger value="history" className="gap-2">
+              <History className="h-4 w-4" />
+              Histórico
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details">
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
           {/* Cover Upload */}
           <div className="space-y-2">
             <Label>Capa do projeto</Label>
@@ -298,6 +317,16 @@ export function EditProjectModal({ open, onOpenChange, project }: EditProjectMod
               </div>
             )}
           </div>
+
+          {/* Deadline Picker */}
+          <div className="space-y-2">
+            <Label>Prazo de entrega</Label>
+            <DeadlinePicker
+              value={deadline}
+              onChange={setDeadline}
+              disabled={updateProject.isPending}
+            />
+          </div>
           
           <DialogFooter>
             <Button
@@ -320,6 +349,12 @@ export function EditProjectModal({ open, onOpenChange, project }: EditProjectMod
             </Button>
           </DialogFooter>
         </form>
+          </TabsContent>
+          
+          <TabsContent value="history" className="mt-4">
+            <ProjectHistoryPanel projectId={project.id} />
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );

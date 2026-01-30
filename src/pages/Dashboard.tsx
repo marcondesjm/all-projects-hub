@@ -12,6 +12,7 @@ import { AddAccountModal } from '@/components/accounts/AddAccountModal';
 import { EditAccountModal } from '@/components/accounts/EditAccountModal';
 import { AddProjectModal } from '@/components/projects/AddProjectModal';
 import { EditProjectModal } from '@/components/projects/EditProjectModal';
+import { ProjectHistoryModal } from '@/components/projects/ProjectHistoryModal';
 import { TagsManager } from '@/components/tags/TagsManager';
 import { SettingsModal } from '@/components/settings/SettingsModal';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
@@ -61,6 +62,8 @@ export default function Dashboard() {
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
+  const [historyModalOpen, setHistoryModalOpen] = useState(false);
+  const [historyProjectId, setHistoryProjectId] = useState<string | null>(null);
 
   const { data: accounts = [], isLoading: accountsLoading } = useAccounts();
   const { data: projects = [], isLoading: projectsLoading } = useProjects();
@@ -208,6 +211,11 @@ export default function Dashboard() {
       setEditingProject(project);
       setEditProjectOpen(true);
     }
+  };
+
+  const handleShowHistory = (projectId: string) => {
+    setHistoryProjectId(projectId);
+    setHistoryModalOpen(true);
   };
 
   const handleDeleteProject = (projectId: string) => {
@@ -448,6 +456,7 @@ export default function Dashboard() {
                       onEdit={handleEditProject}
                       onDelete={handleDeleteProject}
                       onArchive={handleArchiveProject}
+                      onShowHistory={handleShowHistory}
                     />
                   </div>
                 );
@@ -497,6 +506,14 @@ export default function Dashboard() {
       <SettingsModal
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
+      />
+
+      {/* Project History Modal */}
+      <ProjectHistoryModal
+        open={historyModalOpen}
+        onOpenChange={setHistoryModalOpen}
+        projectId={historyProjectId}
+        projectName={historyProjectId ? projects.find(p => p.id === historyProjectId)?.name : undefined}
       />
 
       {/* Global Search */}

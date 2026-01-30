@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, FolderKanban, Play, Sparkles } from 'lucide-react';
+import { Loader2, FolderKanban } from 'lucide-react';
 
 export default function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -67,60 +67,34 @@ export default function Auth() {
     setIsLoading(false);
   };
 
-  const handleDemo = () => {
-    navigate('/demo');
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <div className="w-full max-w-md space-y-6">
+      <div className="w-full max-w-sm space-y-6">
         {/* Logo */}
         <div className="flex flex-col items-center gap-2">
-          <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
-            <FolderKanban className="w-6 h-6 text-primary-foreground" />
+          <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center">
+            <FolderKanban className="w-5 h-5 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl font-bold text-foreground">ProjectHub</h1>
-          <p className="text-sm text-muted-foreground text-center">
+          <h1 className="text-xl font-bold text-foreground">ProjectHub</h1>
+          <p className="text-xs text-muted-foreground text-center">
             Organize todos os seus projetos Lovable em um só lugar
           </p>
         </div>
 
-        {/* Demo Button */}
-        <Button 
-          variant="outline" 
-          className="w-full gap-2 h-12 border-primary/30 hover:bg-primary/5 hover:border-primary transition-all"
-          onClick={handleDemo}
-        >
-          <Play className="w-4 h-4 text-primary" />
-          <span>Ver Demonstração</span>
-          <Sparkles className="w-4 h-4 text-primary" />
-        </Button>
-
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <span className="w-full border-t border-border" />
-          </div>
-          <div className="relative flex justify-center text-xs uppercase">
-            <span className="bg-background px-2 text-muted-foreground">
-              ou entre na sua conta
-            </span>
-          </div>
-        </div>
-
-        <Card className="border-border/50 shadow-lg">
+        <Card className="border-border/50 shadow-sm">
           <Tabs defaultValue="login" className="w-full">
-            <CardHeader className="pb-4">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Entrar</TabsTrigger>
-                <TabsTrigger value="signup">Criar conta</TabsTrigger>
+            <CardHeader className="pb-3 pt-4">
+              <TabsList className="grid w-full grid-cols-2 h-9">
+                <TabsTrigger value="login" className="text-sm">Entrar</TabsTrigger>
+                <TabsTrigger value="signup" className="text-sm">Criar conta</TabsTrigger>
               </TabsList>
             </CardHeader>
 
-            <CardContent>
-              <TabsContent value="login" className="mt-0">
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="login-email">Email</Label>
+            <CardContent className="pb-5">
+              <TabsContent value="login" className="mt-0 space-y-3">
+                <form onSubmit={handleLogin} className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="login-email" className="text-sm">Email</Label>
                     <Input
                       id="login-email"
                       type="email"
@@ -128,10 +102,11 @@ export default function Auth() {
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
+                      className="h-9"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="login-password">Senha</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="login-password" className="text-sm">Senha</Label>
                     <Input
                       id="login-password"
                       type="password"
@@ -139,14 +114,12 @@ export default function Auth() {
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       required
+                      className="h-9"
                     />
                   </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button type="submit" className="w-full h-9" disabled={isLoading}>
                     {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Entrando...
-                      </>
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       'Entrar'
                     )}
@@ -154,20 +127,21 @@ export default function Auth() {
                 </form>
               </TabsContent>
 
-              <TabsContent value="signup" className="mt-0">
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-name">Nome completo</Label>
+              <TabsContent value="signup" className="mt-0 space-y-3">
+                <form onSubmit={handleSignup} className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="signup-name" className="text-sm">Nome</Label>
                     <Input
                       id="signup-name"
                       type="text"
-                      placeholder="João Silva"
+                      placeholder="Seu nome"
                       value={signupName}
                       onChange={(e) => setSignupName(e.target.value)}
+                      className="h-9"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="signup-email" className="text-sm">Email</Label>
                     <Input
                       id="signup-email"
                       type="email"
@@ -175,29 +149,25 @@ export default function Auth() {
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
                       required
+                      className="h-9"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Senha</Label>
+                  <div className="space-y-1.5">
+                    <Label htmlFor="signup-password" className="text-sm">Senha</Label>
                     <Input
                       id="signup-password"
                       type="password"
-                      placeholder="••••••••"
+                      placeholder="Mínimo 6 caracteres"
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
                       minLength={6}
+                      className="h-9"
                     />
-                    <p className="text-xs text-muted-foreground">
-                      Mínimo de 6 caracteres
-                    </p>
                   </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button type="submit" className="w-full h-9" disabled={isLoading}>
                     {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Criando conta...
-                      </>
+                      <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (
                       'Criar conta'
                     )}
@@ -208,9 +178,13 @@ export default function Auth() {
           </Tabs>
         </Card>
 
-        {/* Trial info */}
+        {/* Demo link */}
         <p className="text-xs text-center text-muted-foreground">
-          ✨ <strong>15 dias grátis</strong> com acesso a todos os recursos
+          <Link to="/demo" className="text-primary hover:underline">
+            Ver demonstração
+          </Link>
+          {' · '}
+          15 dias grátis
         </p>
       </div>
     </div>

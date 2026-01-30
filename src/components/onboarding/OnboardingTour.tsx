@@ -8,7 +8,12 @@ import {
   ArrowRight, 
   ArrowLeft,
   Sparkles,
-  Check
+  Check,
+  Search,
+  Star,
+  BarChart3,
+  Download,
+  Settings
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -23,23 +28,65 @@ const steps = [
   {
     id: 1,
     title: 'Bem-vindo ao ProjectHub! 🚀',
-    description: 'Gerencie todos os seus projetos Lovable em um só lugar. Vamos fazer um tour rápido para você começar.',
+    description: 'Gerencie todos os seus projetos Lovable em um só lugar. Criamos alguns projetos de exemplo para você explorar o painel.',
     icon: Sparkles,
     color: 'bg-gradient-to-br from-primary to-primary/60',
   },
   {
     id: 2,
-    title: 'Conecte suas Contas',
-    description: 'Adicione suas contas Lovable para importar e organizar seus projetos automaticamente. Cada conta pode ter uma cor única para fácil identificação.',
-    icon: LayoutDashboard,
-    color: 'bg-gradient-to-br from-primary to-accent',
+    title: 'Seus Projetos de Exemplo',
+    description: 'Adicionamos 4 projetos de demonstração para você ver como o painel funciona. Você pode editá-los, excluí-los ou adicionar seus próprios projetos reais.',
+    icon: FolderPlus,
+    color: 'bg-gradient-to-br from-emerald-500 to-emerald-600',
   },
   {
     id: 3,
-    title: 'Organize com Tags',
-    description: 'Use tags personalizadas para categorizar seus projetos. Filtre rapidamente por status, tipo ou qualquer tag que você criar.',
+    title: 'Conecte suas Contas Lovable',
+    description: 'Adicione suas contas Lovable reais clicando em "+ Nova Conta" na barra lateral. Cada conta pode ter uma cor única para fácil identificação.',
+    icon: LayoutDashboard,
+    color: 'bg-gradient-to-br from-blue-500 to-blue-600',
+  },
+  {
+    id: 4,
+    title: 'Organize com Tags e Filtros',
+    description: 'Use tags personalizadas para categorizar seus projetos. Filtre rapidamente por status (Publicado, Rascunho, Arquivado) ou tipo de projeto.',
     icon: Tags,
-    color: 'bg-gradient-to-br from-primary/80 to-secondary',
+    color: 'bg-gradient-to-br from-violet-500 to-violet-600',
+  },
+  {
+    id: 5,
+    title: 'Busca Rápida (Ctrl+K)',
+    description: 'Pressione Ctrl+K (ou Cmd+K no Mac) para abrir a busca global e encontrar qualquer projeto, conta ou tag instantaneamente.',
+    icon: Search,
+    color: 'bg-gradient-to-br from-amber-500 to-amber-600',
+  },
+  {
+    id: 6,
+    title: 'Favoritos e Visualizações',
+    description: 'Marque projetos como favoritos clicando na estrela. O contador de visualizações mostra quantas vezes cada projeto foi acessado.',
+    icon: Star,
+    color: 'bg-gradient-to-br from-yellow-500 to-yellow-600',
+  },
+  {
+    id: 7,
+    title: 'Estatísticas e Gráficos',
+    description: 'No topo do dashboard, veja estatísticas dos seus projetos: total, favoritos, publicados e arquivados. Os gráficos mostram a distribuição por status e tipo.',
+    icon: BarChart3,
+    color: 'bg-gradient-to-br from-rose-500 to-rose-600',
+  },
+  {
+    id: 8,
+    title: 'Exportar e Importar',
+    description: 'Use os botões Exportar/Importar para fazer backup dos seus dados ou migrar projetos entre contas. Tudo é salvo em formato JSON.',
+    icon: Download,
+    color: 'bg-gradient-to-br from-cyan-500 to-cyan-600',
+  },
+  {
+    id: 9,
+    title: 'Pronto para Começar!',
+    description: 'Explore o painel, edite os projetos de exemplo ou adicione seus próprios projetos. A qualquer momento, acesse as configurações no menu lateral.',
+    icon: Settings,
+    color: 'bg-gradient-to-br from-primary to-accent',
   },
 ];
 

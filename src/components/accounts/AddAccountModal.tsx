@@ -115,205 +115,207 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader className="flex-shrink-0">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="flex-shrink-0 p-6 pb-0">
           <DialogTitle>Adicionar Conta Lovable</DialogTitle>
           <DialogDescription>
             Adicione uma nova conta Lovable com informações do projeto Supabase.
           </DialogDescription>
         </DialogHeader>
         
-        <ScrollArea className="flex-1 pr-4">
-          <form onSubmit={handleSubmit} className="space-y-4 pb-4">
-            {/* Informações Básicas */}
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="account-name" className="flex items-center gap-2">
-                  <User className="w-4 h-4" />
-                  Nome da conta *
-                </Label>
-                <Input
-                  id="account-name"
-                  placeholder="Ex: Projetos Pessoais"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="account-email" className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  Email de cadastro Lovable *
-                </Label>
-                <Input
-                  id="account-email"
-                  type="email"
-                  placeholder="email@exemplo.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <ScrollArea className="flex-1 px-6">
+            <div className="space-y-4 py-4">
+              {/* Informações Básicas */}
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="account-name" className="flex items-center gap-2">
+                    <User className="w-4 h-4" />
+                    Nome da conta *
+                  </Label>
+                  <Input
+                    id="account-name"
+                    placeholder="Ex: Projetos Pessoais"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="account-email" className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    Email de cadastro Lovable *
+                  </Label>
+                  <Input
+                    id="account-email"
+                    type="email"
+                    placeholder="email@exemplo.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="admin-email" className="flex items-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  Email de administrador
-                </Label>
-                <Input
-                  id="admin-email"
-                  type="email"
-                  placeholder="admin@exemplo.com"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                />
-              </div>
+                <div className="space-y-2">
+                  <Label htmlFor="admin-email" className="flex items-center gap-2">
+                    <Mail className="w-4 h-4" />
+                    Email de administrador
+                  </Label>
+                  <Input
+                    id="admin-email"
+                    type="email"
+                    placeholder="admin@exemplo.com"
+                    value={adminEmail}
+                    onChange={(e) => setAdminEmail(e.target.value)}
+                  />
+                </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="account-credits" className="flex items-center gap-2">
-                  <Coins className="w-4 h-4" />
-                  Créditos disponíveis
-                </Label>
-                <Input
-                  id="account-credits"
-                  type="number"
-                  min="0"
-                  placeholder="0"
-                  value={credits}
-                  onChange={(e) => setCredits(e.target.value)}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Cor de identificação</Label>
-                <div className="flex gap-2">
-                  {colors.map((color) => (
-                    <button
-                      key={color.id}
-                      type="button"
-                      onClick={() => setSelectedColor(color.id)}
-                      className={cn(
-                        'w-8 h-8 rounded-full transition-all duration-200',
-                        color.class,
-                        selectedColor === color.id 
-                          ? 'ring-2 ring-offset-2 ring-primary scale-110' 
-                          : 'hover:scale-105'
-                      )}
-                      title={color.label}
-                    />
-                  ))}
+                <div className="space-y-2">
+                  <Label htmlFor="account-credits" className="flex items-center gap-2">
+                    <Coins className="w-4 h-4" />
+                    Créditos disponíveis
+                  </Label>
+                  <Input
+                    id="account-credits"
+                    type="number"
+                    min="0"
+                    placeholder="0"
+                    value={credits}
+                    onChange={(e) => setCredits(e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label>Cor de identificação</Label>
+                  <div className="flex gap-2">
+                    {colors.map((color) => (
+                      <button
+                        key={color.id}
+                        type="button"
+                        onClick={() => setSelectedColor(color.id)}
+                        className={cn(
+                          'w-8 h-8 rounded-full transition-all duration-200',
+                          color.class,
+                          selectedColor === color.id 
+                            ? 'ring-2 ring-offset-2 ring-primary scale-110' 
+                            : 'hover:scale-105'
+                        )}
+                        title={color.label}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
+
+              {/* Configurações Supabase (Accordion) */}
+              <Accordion type="multiple" className="w-full">
+                <AccordionItem value="supabase" className="border rounded-lg px-3">
+                  <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                    <span className="flex items-center gap-2">
+                      <Globe className="w-4 h-4 text-primary" />
+                      Configurações Supabase (opcional)
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 pb-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="supabase-project-id">Project ID</Label>
+                      <Input
+                        id="supabase-project-id"
+                        placeholder="Ex: abcdefghijklmnop"
+                        value={supabaseProjectId}
+                        onChange={(e) => setSupabaseProjectId(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="supabase-url">URL do Projeto</Label>
+                      <Input
+                        id="supabase-url"
+                        placeholder="https://xxx.supabase.co"
+                        value={supabaseUrl}
+                        onChange={(e) => setSupabaseUrl(e.target.value)}
+                      />
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="keys" className="border rounded-lg px-3 mt-2">
+                  <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                    <span className="flex items-center gap-2">
+                      <Key className="w-4 h-4 text-primary" />
+                      API Keys (opcional)
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4 pb-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="anon-key">Anon Key (Pública)</Label>
+                      <Input
+                        id="anon-key"
+                        placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp..."
+                        value={anonKey}
+                        onChange={(e) => setAnonKey(e.target.value)}
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="service-role-key">Service Role Key (Privada)</Label>
+                      <Input
+                        id="service-role-key"
+                        type="password"
+                        placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp..."
+                        value={serviceRoleKey}
+                        onChange={(e) => setServiceRoleKey(e.target.value)}
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        ⚠️ Mantenha esta chave em segredo. Nunca compartilhe publicamente.
+                      </p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+
+                <AccordionItem value="notes" className="border rounded-lg px-3 mt-2">
+                  <AccordionTrigger className="text-sm font-medium hover:no-underline">
+                    <span className="flex items-center gap-2">
+                      <FileText className="w-4 h-4 text-primary" />
+                      Notas e observações (opcional)
+                    </span>
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-4">
+                    <Textarea
+                      id="notes"
+                      placeholder="Adicione notas, observações ou informações adicionais sobre esta conta..."
+                      value={notes}
+                      onChange={(e) => setNotes(e.target.value)}
+                      rows={4}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             </div>
-
-            {/* Configurações Supabase (Accordion) */}
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="supabase">
-                <AccordionTrigger className="text-sm font-medium">
-                  <span className="flex items-center gap-2">
-                    <Globe className="w-4 h-4" />
-                    Configurações Supabase (opcional)
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="space-y-4 pt-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="supabase-project-id">Project ID</Label>
-                    <Input
-                      id="supabase-project-id"
-                      placeholder="Ex: abcdefghijklmnop"
-                      value={supabaseProjectId}
-                      onChange={(e) => setSupabaseProjectId(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="supabase-url">URL do Projeto</Label>
-                    <Input
-                      id="supabase-url"
-                      placeholder="https://xxx.supabase.co"
-                      value={supabaseUrl}
-                      onChange={(e) => setSupabaseUrl(e.target.value)}
-                    />
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="keys">
-                <AccordionTrigger className="text-sm font-medium">
-                  <span className="flex items-center gap-2">
-                    <Key className="w-4 h-4" />
-                    API Keys (opcional)
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="space-y-4 pt-2">
-                  <div className="space-y-2">
-                    <Label htmlFor="anon-key">Anon Key (Pública)</Label>
-                    <Input
-                      id="anon-key"
-                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp..."
-                      value={anonKey}
-                      onChange={(e) => setAnonKey(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="service-role-key">Service Role Key (Privada)</Label>
-                    <Input
-                      id="service-role-key"
-                      type="password"
-                      placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6Ikp..."
-                      value={serviceRoleKey}
-                      onChange={(e) => setServiceRoleKey(e.target.value)}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      ⚠️ Mantenha esta chave em segredo. Nunca compartilhe publicamente.
-                    </p>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="notes">
-                <AccordionTrigger className="text-sm font-medium">
-                  <span className="flex items-center gap-2">
-                    <FileText className="w-4 h-4" />
-                    Notas e observações (opcional)
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="pt-2">
-                  <Textarea
-                    id="notes"
-                    placeholder="Adicione notas, observações ou informações adicionais sobre esta conta..."
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    rows={4}
-                  />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            
-            <DialogFooter className="pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-                disabled={createAccount.isPending}
-              >
-                Cancelar
-              </Button>
-              <Button type="submit" disabled={createAccount.isPending}>
-                {createAccount.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Adicionando...
-                  </>
-                ) : (
-                  'Adicionar Conta'
-                )}
-              </Button>
-            </DialogFooter>
-          </form>
-        </ScrollArea>
+          </ScrollArea>
+          
+          <DialogFooter className="flex-shrink-0 p-6 pt-4 border-t">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={createAccount.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button type="submit" disabled={createAccount.isPending}>
+              {createAccount.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Adicionando...
+                </>
+              ) : (
+                'Adicionar Conta'
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   );

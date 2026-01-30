@@ -20,6 +20,7 @@ import { GlobalSearch } from '@/components/search/GlobalSearch';
 import { TrialBanner } from '@/components/subscription/TrialBanner';
 import { TrialExpiredModal } from '@/components/subscription/TrialExpiredModal';
 import { ExportBackupButton } from '@/components/export/ExportBackupButton';
+import { ImportBackupButton } from '@/components/export/ImportBackupButton';
 import { useAccounts, useProjects, useTags, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -361,6 +362,7 @@ export default function Dashboard() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-foreground">{getViewTitle()}</h2>
             <div className="flex items-center gap-2">
+              <ImportBackupButton />
               <ExportBackupButton />
               <span className="text-sm text-muted-foreground">
                 {filteredProjects.length} projeto{filteredProjects.length !== 1 ? 's' : ''}

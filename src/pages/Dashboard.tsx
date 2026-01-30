@@ -5,8 +5,9 @@ import { StatsCards } from '@/components/dashboard/StatsCards';
 import { FilterBar } from '@/components/projects/FilterBar';
 import { ProjectCard } from '@/components/projects/ProjectCard';
 import { ProjectList } from '@/components/projects/ProjectList';
-import { mockProjects, mockAccounts } from '@/data/mockData';
+import { useAccounts, useProjects, useToggleFavorite, LovableAccount } from '@/hooks/useProjects';
 import { ProjectStatus, ProjectType } from '@/types/project';
+import { Loader2 } from 'lucide-react';
 
 export default function Dashboard() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -16,21 +17,24 @@ export default function Dashboard() {
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | 'all'>('all');
   const [typeFilter, setTypeFilter] = useState<ProjectType | 'all'>('all');
   const [tagFilter, setTagFilter] = useState<string | null>(null);
-  const [projects, setProjects] = useState(mockProjects);
+
+  const { data: accounts = [], isLoading: accountsLoading } = useAccounts();
+  const { data: projects = [], isLoading: projectsLoading } = useProjects();
+  const toggleFavorite = useToggleFavorite();
 
   const filteredProjects = useMemo(() => {
     let filtered = [...projects];
 
     // View filter
     if (activeView === 'favorites') {
-      filtered = filtered.filter(p => p.isFavorite);
+      filtered = filtered.filter(p => p.is_favorite);
     } else if (activeView === 'archived') {
       filtered = filtered.filter(p => p.status === 'archived');
     }
 
     // Account filter
     if (selectedAccount) {
-      filtered = filtered.filter(p => p.accountId === selectedAccount);
+      filtered = filtered.filter(p => p.account_id === selectedAccount);
     }
 
     // Status filter
@@ -45,7 +49,9 @@ export default function Dashboard() {
 
     // Tag filter
     if (tagFilter) {
-      filtered = filtered.filter(p => p.tags.includes(tagFilter));
+      filtered = filtered.filter(p => 
+        p.tags?.some(tag => tag.name === tagFilter)
+      );
     }
 
     // Search filter
@@ -53,8 +59,8 @@ export default function Dashboard() {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter(p =>
         p.name.toLowerCase().includes(query) ||
-        p.description.toLowerCase().includes(query) ||
-        p.tags.some(tag => tag.toLowerCase().includes(query))
+        (p.description?.toLowerCase().includes(query)) ||
+        p.tags?.some(tag => tag.name.toLowerCase().includes(query))
       );
     }
 
@@ -62,11 +68,10 @@ export default function Dashboard() {
   }, [projects, activeView, selectedAccount, statusFilter, typeFilter, tagFilter, searchQuery]);
 
   const handleToggleFavorite = (projectId: string) => {
-    setProjects(prev =>
-      prev.map(p =>
-        p.id === projectId ? { ...p, isFavorite: !p.isFavorite } : p
-      )
-    );
+    const project = projects.find(p => p.id === projectId);
+    if (project) {
+      toggleFavorite.mutate({ id: projectId, isFavorite: !project.is_favorite });
+    }
   };
 
   const clearFilters = () => {
@@ -79,17 +84,18 @@ export default function Dashboard() {
 
   const stats = {
     totalProjects: projects.length,
-    favorites: projects.filter(p => p.isFavorite).length,
+    favorites: projects.filter(p => p.is_favorite).length,
     published: projects.filter(p => p.status === 'published').length,
     archived: projects.filter(p => p.status === 'archived').length,
   };
 
-  const getAccount = (accountId: string) => mockAccounts.find(a => a.id === accountId)!;
+  const getAccount = (accountId: string): LovableAccount | undefined => 
+    accounts.find(a => a.id === accountId);
 
   const getViewTitle = () => {
     if (selectedAccount) {
       const account = getAccount(selectedAccount);
-      return account.name;
+      return account?.name || 'Conta';
     }
     switch (activeView) {
       case 'favorites': return 'Projetos Favoritos';
@@ -99,6 +105,34 @@ export default function Dashboard() {
     }
   };
 
+  // Transform project data for components
+  const transformedProjects = filteredProjects.map(p => ({
+    id: p.id,
+    name: p.name,
+    description: p.description || '',
+    url: p.url || '',
+    screenshot: p.screenshot,
+    status: p.status,
+    type: p.type,
+    accountId: p.account_id,
+    createdAt: new Date(p.created_at),
+    updatedAt: new Date(p.updated_at),
+    isFavorite: p.is_favorite,
+    tags: p.tags?.map(t => t.name) || [],
+    notes: p.notes,
+    viewCount: p.view_count,
+  }));
+
+  const transformedAccounts = accounts.map(a => ({
+    id: a.id,
+    email: a.email,
+    name: a.name,
+    color: a.color,
+    projectCount: projects.filter(p => p.account_id === a.id).length,
+  }));
+
+  const isLoading = accountsLoading || projectsLoading;
+
   return (
     <div className="flex h-screen bg-background">
       <Sidebar
@@ -106,6 +140,8 @@ export default function Dashboard() {
         onViewChange={setActiveView}
         selectedAccount={selectedAccount}
         onAccountChange={setSelectedAccount}
+        accounts={accounts}
+        isLoading={accountsLoading}
       />
       
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -141,36 +177,55 @@ export default function Dashboard() {
           />
 
           {/* Projects */}
-          {filteredProjects.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-16">
+              <Loader2 className="w-8 h-8 animate-spin text-primary mb-4" />
+              <p className="text-sm text-muted-foreground">Carregando projetos...</p>
+            </div>
+          ) : filteredProjects.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <span className="text-2xl">🔍</span>
               </div>
-              <h3 className="text-lg font-medium text-foreground mb-1">Nenhum projeto encontrado</h3>
+              <h3 className="text-lg font-medium text-foreground mb-1">
+                {projects.length === 0 ? 'Nenhum projeto ainda' : 'Nenhum projeto encontrado'}
+              </h3>
               <p className="text-sm text-muted-foreground">
-                Tente ajustar seus filtros ou termo de busca
+                {projects.length === 0 
+                  ? 'Adicione uma conta Lovable e comece a gerenciar seus projetos'
+                  : 'Tente ajustar seus filtros ou termo de busca'
+                }
               </p>
             </div>
           ) : viewMode === 'grid' ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {filteredProjects.map((project, index) => (
-                <div
-                  key={project.id}
-                  className="animate-slide-up"
-                  style={{ animationDelay: `${index * 50}ms` }}
-                >
-                  <ProjectCard
-                    project={project}
-                    account={getAccount(project.accountId)}
-                    onToggleFavorite={handleToggleFavorite}
-                  />
-                </div>
-              ))}
+              {transformedProjects.map((project, index) => {
+                const account = getAccount(project.accountId);
+                return (
+                  <div
+                    key={project.id}
+                    className="animate-slide-up"
+                    style={{ animationDelay: `${index * 50}ms` }}
+                  >
+                    <ProjectCard
+                      project={project}
+                      account={account ? {
+                        id: account.id,
+                        email: account.email,
+                        name: account.name,
+                        color: account.color,
+                        projectCount: transformedAccounts.find(a => a.id === account.id)?.projectCount || 0,
+                      } : undefined}
+                      onToggleFavorite={handleToggleFavorite}
+                    />
+                  </div>
+                );
+              })}
             </div>
           ) : (
             <ProjectList
-              projects={filteredProjects}
-              accounts={mockAccounts}
+              projects={transformedProjects}
+              accounts={transformedAccounts}
               onToggleFavorite={handleToggleFavorite}
             />
           )}

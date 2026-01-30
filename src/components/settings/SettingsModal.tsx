@@ -14,13 +14,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, User, Shield, Palette, Database, Trash2, RotateCcw, HelpCircle, Bell } from 'lucide-react';
+import { Loader2, User, Shield, Palette, Database, Trash2, RotateCcw, HelpCircle, Bell, Key } from 'lucide-react';
 import { useTheme } from '@/components/theme/ThemeProvider';
 import { useSeedDemoData } from '@/hooks/useSeedDemoData';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { useQueryClient } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { DeadlineNotificationSettings } from './DeadlineNotificationSettings';
+import { KeysManagementPanel } from '@/components/keys/KeysManagementPanel';
 
 interface SettingsModalProps {
   open: boolean;
@@ -43,6 +44,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
   const [changingPassword, setChangingPassword] = useState(false);
   const [hasDemoData, setHasDemoData] = useState(false);
   const [checkingDemo, setCheckingDemo] = useState(true);
+  const [keysModalOpen, setKeysModalOpen] = useState(false);
 
   useEffect(() => {
     if (user && open) {
@@ -213,7 +215,7 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
         </DialogHeader>
 
         <Tabs defaultValue="profile" className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="profile" className="gap-1 text-xs">
               <User className="w-3 h-3" />
               Perfil
@@ -221,6 +223,10 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
             <TabsTrigger value="security" className="gap-1 text-xs">
               <Shield className="w-3 h-3" />
               Segurança
+            </TabsTrigger>
+            <TabsTrigger value="keys" className="gap-1 text-xs">
+              <Key className="w-3 h-3" />
+              Keys
             </TabsTrigger>
             <TabsTrigger value="notifications" className="gap-1 text-xs">
               <Bell className="w-3 h-3" />
@@ -314,6 +320,23 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
                 )}
               </Button>
             </form>
+          </TabsContent>
+
+          {/* Keys Tab */}
+          <TabsContent value="keys" className="space-y-4 mt-4">
+            <div className="space-y-3">
+              <Label className="flex items-center gap-2">
+                <Key className="w-4 h-4" />
+                Gerenciador de API Keys
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                Gerencie todas as API Keys (Supabase, OpenAI, etc.) armazenadas localmente no navegador.
+              </p>
+              <Button variant="outline" onClick={() => setKeysModalOpen(true)}>
+                <Key className="mr-2 h-4 w-4" />
+                Abrir Gerenciador de Keys
+              </Button>
+            </div>
           </TabsContent>
 
           {/* Notifications Tab */}
@@ -435,6 +458,9 @@ export function SettingsModal({ open, onOpenChange }: SettingsModalProps) {
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Keys Management Panel */}
+      <KeysManagementPanel open={keysModalOpen} onOpenChange={setKeysModalOpen} />
     </Dialog>
   );
 }

@@ -24,10 +24,12 @@ import {
   ExternalLink, 
   Archive, 
   Star,
-  Copy
+  Copy,
+  Share2
 } from 'lucide-react';
 import { useDeleteProject, useUpdateProject, Project } from '@/hooks/useProjects';
 import { useToast } from '@/hooks/use-toast';
+import { ShareProjectModal } from '@/components/collaboration/ShareProjectModal';
 
 interface ProjectActionsProps {
   project: {
@@ -38,10 +40,12 @@ interface ProjectActionsProps {
     status?: string;
   };
   onEdit?: () => void;
+  isOwner?: boolean;
 }
 
-export function ProjectActions({ project, onEdit }: ProjectActionsProps) {
+export function ProjectActions({ project, onEdit, isOwner = true }: ProjectActionsProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
   
   const deleteProject = useDeleteProject();
   const updateProject = useUpdateProject();
@@ -108,6 +112,11 @@ export function ProjectActions({ project, onEdit }: ProjectActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem onClick={() => setShareModalOpen(true)}>
+            <Share2 className="mr-2 h-4 w-4" />
+            Compartilhar
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           {onEdit && (
             <DropdownMenuItem onClick={onEdit}>
               <Pencil className="mr-2 h-4 w-4" />
@@ -162,6 +171,14 @@ export function ProjectActions({ project, onEdit }: ProjectActionsProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ShareProjectModal
+        open={shareModalOpen}
+        onOpenChange={setShareModalOpen}
+        projectId={project.id}
+        projectName={project.name}
+        isOwner={isOwner}
+      />
     </>
   );
 }

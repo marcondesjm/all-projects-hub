@@ -1,6 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
+import { 
   FolderKanban, 
   Tags, 
   Search, 
@@ -13,7 +19,8 @@ import {
   Sparkles,
   Coins,
   Eye,
-  Clock
+  Clock,
+  HelpCircle
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -81,6 +88,37 @@ const testimonials = [
     role: 'Dono de Agência',
     content: 'Com múltiplas contas de clientes, o ProjectHub é essencial. Não vivo mais sem ele.',
     avatar: 'PS',
+  },
+];
+
+const faqs = [
+  {
+    question: 'Como funciona o período de teste gratuito?',
+    answer: 'Você tem 15 dias para testar todas as funcionalidades do ProjectHub sem precisar cadastrar cartão de crédito. Após o período, você pode optar por assinar o plano Pro ou continuar com acesso limitado.',
+  },
+  {
+    question: 'Posso conectar quantas contas Lovable eu quiser?',
+    answer: 'Sim! Com o plano Pro você pode conectar contas ilimitadas e gerenciar todos os seus projetos em um único painel centralizado.',
+  },
+  {
+    question: 'Meus dados estão seguros?',
+    answer: 'Absolutamente. Utilizamos criptografia de ponta a ponta e seguimos as melhores práticas de segurança. Seus dados são armazenados em servidores seguros e você pode exportar ou excluir suas informações a qualquer momento.',
+  },
+  {
+    question: 'Como funciona o pagamento?',
+    answer: 'Aceitamos pagamento via PIX. Após a confirmação do pagamento, seu plano é ativado imediatamente. Você pode cancelar a qualquer momento, sem multas ou burocracia.',
+  },
+  {
+    question: 'O ProjectHub sincroniza automaticamente com minhas contas Lovable?',
+    answer: 'Os projetos são gerenciados manualmente no ProjectHub. Você adiciona os projetos que deseja acompanhar e pode atualizar as informações como status, notas e progresso sempre que precisar.',
+  },
+  {
+    question: 'Posso usar o ProjectHub em equipe?',
+    answer: 'Atualmente o ProjectHub é focado em uso individual. Estamos trabalhando em funcionalidades de colaboração para equipes que serão lançadas em breve!',
+  },
+  {
+    question: 'O que acontece se eu cancelar minha assinatura?',
+    answer: 'Você mantém acesso até o final do período pago. Após isso, sua conta volta para o modo limitado, mas seus dados são mantidos por 90 dias caso queira reativar.',
   },
 ];
 
@@ -418,6 +456,44 @@ export default function Landing() {
             <p className="text-center text-xs text-muted-foreground mt-4">
               Pagamento via PIX • Cancele quando quiser
             </p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="container mx-auto max-w-3xl">
+          <div className="text-center mb-12">
+            <Badge variant="outline" className="mb-4">
+              <HelpCircle className="w-3.5 h-3.5 mr-1.5" />
+              FAQ
+            </Badge>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+              Perguntas Frequentes
+            </h2>
+            <p className="text-lg text-muted-foreground">
+              Tire suas dúvidas sobre o ProjectHub
+            </p>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            <Accordion type="single" collapsible className="w-full">
+              {faqs.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`} className="bg-card border border-border rounded-lg mb-3 px-4">
+                  <AccordionTrigger className="text-left hover:no-underline">
+                    <span className="font-medium">{faq.question}</span>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
           </motion.div>
         </div>
       </section>

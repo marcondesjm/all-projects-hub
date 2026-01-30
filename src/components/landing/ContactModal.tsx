@@ -10,6 +10,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -79,8 +80,8 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle className="flex items-center gap-2">
             <MessageCircle className="w-5 h-5 text-primary" />
             Fale Conosco
@@ -90,7 +91,8 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
+        <ScrollArea className="flex-1 pr-4">
+          <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
@@ -184,6 +186,7 @@ export function ContactModal({ open, onOpenChange }: ContactModalProps) {
             </Button>
           </form>
         </Form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );

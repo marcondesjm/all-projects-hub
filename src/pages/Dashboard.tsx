@@ -19,6 +19,7 @@ import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { GlobalSearch } from '@/components/search/GlobalSearch';
 import { useAccounts, useProjects, useTags, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
 import { useOnboarding } from '@/hooks/useOnboarding';
+import { useNotifications } from '@/hooks/useNotifications';
 import { ProjectStatus, ProjectType } from '@/types/project';
 import { Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -62,6 +63,15 @@ export default function Dashboard() {
   const updateProject = useUpdateProject();
   const deleteProject = useDeleteProject();
   const { toast } = useToast();
+  
+  const {
+    notifications,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    clearAll: clearNotifications,
+    notifySuccess,
+  } = useNotifications();
   
   const {
     onboarding,
@@ -324,6 +334,11 @@ export default function Dashboard() {
           onNewProject={() => setAddProjectOpen(true)}
           mobileMenuTrigger={<MobileSidebar {...sidebarProps} />}
           onOpenSearch={() => setGlobalSearchOpen(true)}
+          notifications={notifications}
+          onMarkAsRead={markAsRead}
+          onMarkAllAsRead={markAllAsRead}
+          onDeleteNotification={deleteNotification}
+          onClearNotifications={clearNotifications}
         />
         
         <main className="flex-1 overflow-y-auto p-3 sm:p-6 pb-20 lg:pb-6 scrollbar-thin">

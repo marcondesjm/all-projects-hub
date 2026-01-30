@@ -1,9 +1,10 @@
-import { Search, Bell, Grid3X3, List, Plus } from 'lucide-react';
+import { Search, Grid3X3, List, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemeToggle } from '@/components/theme/ThemeToggle';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { NotificationCenter, Notification } from '@/components/notifications/NotificationCenter';
 import { ReactNode } from 'react';
 
 interface HeaderProps {
@@ -14,9 +15,27 @@ interface HeaderProps {
   onNewProject?: () => void;
   mobileMenuTrigger?: ReactNode;
   onOpenSearch?: () => void;
+  notifications?: Notification[];
+  onMarkAsRead?: (id: string) => void;
+  onMarkAllAsRead?: () => void;
+  onDeleteNotification?: (id: string) => void;
+  onClearNotifications?: () => void;
 }
 
-export function Header({ searchQuery, onSearchChange, viewMode, onViewModeChange, onNewProject, mobileMenuTrigger, onOpenSearch }: HeaderProps) {
+export function Header({ 
+  searchQuery, 
+  onSearchChange, 
+  viewMode, 
+  onViewModeChange, 
+  onNewProject, 
+  mobileMenuTrigger, 
+  onOpenSearch,
+  notifications = [],
+  onMarkAsRead = () => {},
+  onMarkAllAsRead = () => {},
+  onDeleteNotification = () => {},
+  onClearNotifications = () => {},
+}: HeaderProps) {
   return (
     <header className="h-14 sm:h-16 px-3 sm:px-6 flex items-center justify-between border-b border-border bg-card/50 backdrop-blur-sm gap-2 sm:gap-4">
       {/* Mobile Menu */}
@@ -101,18 +120,14 @@ export function Header({ searchQuery, onSearchChange, viewMode, onViewModeChange
         {/* Theme Toggle */}
         <ThemeToggle />
 
-        {/* Notifications - hidden on small screens */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="relative hidden sm:flex" aria-label="Notificações">
-              <Bell className="w-4 h-4" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full" aria-hidden="true" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Notificações</p>
-          </TooltipContent>
-        </Tooltip>
+        {/* Notifications */}
+        <NotificationCenter
+          notifications={notifications}
+          onMarkAsRead={onMarkAsRead}
+          onMarkAllAsRead={onMarkAllAsRead}
+          onDelete={onDeleteNotification}
+          onClearAll={onClearNotifications}
+        />
 
         {/* New Project */}
         <Tooltip>

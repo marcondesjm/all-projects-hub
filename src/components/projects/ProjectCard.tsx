@@ -2,6 +2,7 @@ import { Star, ExternalLink, MoreHorizontal, Copy, Edit, Trash2, Eye, Archive } 
 import { Project, LovableAccount } from '@/types/project';
 import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,6 +12,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ProjectCardProps {
   project: Project;
@@ -165,6 +167,26 @@ export function ProjectCard({ project, account, onToggleFavorite, onEdit, onDele
                 +{project.tags.length - 3}
               </Badge>
             )}
+          </div>
+        )}
+
+        {/* Progress Bar */}
+        {project.progress < 100 && (
+          <div className="mb-3">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-muted-foreground">Progresso</span>
+                    <span className="font-medium text-foreground">{project.progress}%</span>
+                  </div>
+                  <Progress value={project.progress} className="h-1.5" />
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{project.progress}% concluído</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         )}
 

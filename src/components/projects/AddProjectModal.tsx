@@ -93,6 +93,7 @@ export function AddProjectModal({ open, onOpenChange }: AddProjectModalProps) {
         is_favorite: false,
         screenshot: coverUrl,
         notes: null,
+        progress: 0,
         tagIds: selectedTags,
       });
       

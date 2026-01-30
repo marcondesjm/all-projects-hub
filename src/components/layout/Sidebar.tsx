@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   FolderKanban, 
@@ -12,7 +13,8 @@ import {
   LogOut,
   Loader2,
   Coins,
-  Pencil
+  Pencil,
+  Shield,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -22,6 +24,7 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsAdmin } from '@/hooks/useRoles';
 import { LovableAccount } from '@/hooks/useProjects';
 
 interface SidebarProps {
@@ -57,6 +60,8 @@ export function Sidebar({
 }: SidebarProps) {
   const [accountsOpen, setAccountsOpen] = useState(true);
   const { signOut, user } = useAuth();
+  const isAdmin = useIsAdmin();
+  const navigate = useNavigate();
 
   const navItems = [
     { id: 'all', label: 'Todos os Projetos', icon: LayoutDashboard },
@@ -247,6 +252,16 @@ export function Sidebar({
               {user.email}
             </p>
           </div>
+        )}
+        {isAdmin && (
+          <button 
+            onClick={() => navigate('/admin')}
+            aria-label="Abrir painel administrativo"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+          >
+            <Shield className="w-4 h-4" aria-hidden="true" />
+            Painel Admin
+          </button>
         )}
         <button 
           onClick={onOpenSettings}

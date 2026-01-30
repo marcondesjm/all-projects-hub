@@ -174,6 +174,7 @@ export type Database = {
           last_accessed_at: string | null
           name: string
           notes: string | null
+          progress: number
           screenshot: string | null
           status: string
           type: string
@@ -191,6 +192,7 @@ export type Database = {
           last_accessed_at?: string | null
           name: string
           notes?: string | null
+          progress?: number
           screenshot?: string | null
           status?: string
           type?: string
@@ -208,6 +210,7 @@ export type Database = {
           last_accessed_at?: string | null
           name?: string
           notes?: string | null
+          progress?: number
           screenshot?: string | null
           status?: string
           type?: string
@@ -315,7 +318,26 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      admin_users_view: {
+        Row: {
+          accounts_count: number | null
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string | null
+          max_accounts: number | null
+          max_projects: number | null
+          onboarding_completed: boolean | null
+          plan: Database["public"]["Enums"]["subscription_plan"] | null
+          projects_count: number | null
+          role: Database["public"]["Enums"]["app_role"] | null
+          subscription_expires_at: string | null
+          subscription_started_at: string | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       get_user_role: {
@@ -329,6 +351,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_admin: { Args: never; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "viewer" | "collaborator"

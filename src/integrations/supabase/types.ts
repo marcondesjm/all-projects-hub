@@ -18,6 +18,8 @@ export type Database = {
         Row: {
           color: string
           created_at: string
+          credits: number
+          credits_updated_at: string | null
           email: string
           id: string
           name: string
@@ -27,6 +29,8 @@ export type Database = {
         Insert: {
           color?: string
           created_at?: string
+          credits?: number
+          credits_updated_at?: string | null
           email: string
           id?: string
           name: string
@@ -36,6 +40,8 @@ export type Database = {
         Update: {
           color?: string
           created_at?: string
+          credits?: number
+          credits_updated_at?: string | null
           email?: string
           id?: string
           name?: string

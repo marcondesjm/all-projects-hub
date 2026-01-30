@@ -10,7 +10,8 @@ import {
   Users,
   Tag,
   LogOut,
-  Loader2
+  Loader2,
+  Coins
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -144,8 +145,12 @@ export function Sidebar({
                           : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
                       )}
                     >
-                      <span className={cn('w-2.5 h-2.5 rounded-full', accountColorMap[account.color] || 'bg-muted')} />
+                      <span className={cn('w-2.5 h-2.5 rounded-full flex-shrink-0', accountColorMap[account.color] || 'bg-muted')} />
                       <span className="flex-1 text-left truncate">{account.name}</span>
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Coins className="w-3 h-3" />
+                        {account.credits}
+                      </span>
                     </button>
                   );
                 })

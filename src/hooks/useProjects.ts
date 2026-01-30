@@ -8,6 +8,8 @@ export interface LovableAccount {
   email: string;
   name: string;
   color: 'blue' | 'emerald' | 'amber' | 'rose' | 'violet';
+  credits: number;
+  credits_updated_at: string;
   created_at: string;
   updated_at: string;
 }
@@ -62,7 +64,7 @@ export function useCreateAccount() {
   const { user } = useAuth();
   
   return useMutation({
-    mutationFn: async (account: Omit<LovableAccount, 'id' | 'user_id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (account: Omit<LovableAccount, 'id' | 'user_id' | 'created_at' | 'updated_at' | 'credits_updated_at'>) => {
       const { data, error } = await supabase
         .from('lovable_accounts')
         .insert({ ...account, user_id: user!.id })

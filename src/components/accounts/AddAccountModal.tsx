@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useCreateAccount } from '@/hooks/useProjects';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface AddAccountModalProps {
@@ -31,6 +31,7 @@ const colors = [
 export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [credits, setCredits] = useState('');
   const [selectedColor, setSelectedColor] = useState<'blue' | 'emerald' | 'amber' | 'rose' | 'violet'>('blue');
   
   const createAccount = useCreateAccount();
@@ -48,11 +49,22 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
       return;
     }
 
+    const creditsValue = credits.trim() ? parseInt(credits, 10) : 0;
+    if (isNaN(creditsValue) || creditsValue < 0) {
+      toast({
+        title: 'Créditos inválidos',
+        description: 'Digite um número válido para os créditos.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       await createAccount.mutateAsync({
         name: name.trim(),
         email: email.trim(),
         color: selectedColor,
+        credits: creditsValue,
       });
       
       toast({
@@ -63,6 +75,7 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
       // Reset form
       setName('');
       setEmail('');
+      setCredits('');
       setSelectedColor('blue');
       onOpenChange(false);
     } catch (error: any) {
@@ -106,6 +119,24 @@ export function AddAccountModal({ open, onOpenChange }: AddAccountModalProps) {
               onChange={(e) => setEmail(e.target.value)}
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="account-credits" className="flex items-center gap-2">
+              <Coins className="w-4 h-4" />
+              Créditos disponíveis
+            </Label>
+            <Input
+              id="account-credits"
+              type="number"
+              min="0"
+              placeholder="0"
+              value={credits}
+              onChange={(e) => setCredits(e.target.value)}
+            />
+            <p className="text-xs text-muted-foreground">
+              Quantidade de créditos Lovable disponíveis nesta conta.
+            </p>
           </div>
           
           <div className="space-y-2">

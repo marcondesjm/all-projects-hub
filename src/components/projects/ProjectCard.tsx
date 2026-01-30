@@ -14,7 +14,7 @@ import { ptBR } from 'date-fns/locale';
 
 interface ProjectCardProps {
   project: Project;
-  account: LovableAccount;
+  account?: LovableAccount;
   onToggleFavorite: (projectId: string) => void;
 }
 
@@ -83,9 +83,11 @@ export function ProjectCard({ project, account, onToggleFavorite }: ProjectCardP
         </button>
 
         {/* Account Indicator */}
-        <div className="absolute top-3 left-3 flex items-center gap-2">
-          <span className={cn('w-2.5 h-2.5 rounded-full ring-2 ring-white/50', accountColorMap[account.color])} />
-        </div>
+        {account && (
+          <div className="absolute top-3 left-3 flex items-center gap-2">
+            <span className={cn('w-2.5 h-2.5 rounded-full ring-2 ring-white/50', accountColorMap[account.color])} />
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -140,7 +142,7 @@ export function ProjectCard({ project, account, onToggleFavorite }: ProjectCardP
 
         {/* Footer */}
         <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t border-border">
-          <span>{account.name}</span>
+          <span>{account?.name || 'Sem conta'}</span>
           <span>
             {formatDistanceToNow(project.updatedAt, { addSuffix: true, locale: ptBR })}
           </span>

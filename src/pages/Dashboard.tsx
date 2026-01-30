@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { MobileSidebar } from '@/components/layout/MobileSidebar';
+import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { Header } from '@/components/layout/Header';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { FilterBar } from '@/components/projects/FilterBar';
@@ -262,7 +263,7 @@ export default function Dashboard() {
           mobileMenuTrigger={<MobileSidebar {...sidebarProps} />}
         />
         
-        <main className="flex-1 overflow-y-auto p-3 sm:p-6 scrollbar-thin">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6 pb-20 lg:pb-6 scrollbar-thin">
           {/* Stats */}
           <StatsCards {...stats} />
 
@@ -402,6 +403,13 @@ export default function Dashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav
+        activeView={activeView}
+        onViewChange={handleViewChange}
+        onNewProject={() => setAddProjectOpen(true)}
+      />
     </div>
   );
 }

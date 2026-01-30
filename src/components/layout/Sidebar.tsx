@@ -17,6 +17,7 @@ import {
   Shield,
   MessageCircle,
   Clock,
+  Key,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -39,6 +40,7 @@ interface SidebarProps {
   onAddAccount?: () => void;
   onEditAccount?: (account: LovableAccount) => void;
   onOpenSettings?: () => void;
+  onOpenKeys?: () => void;
 }
 
 const accountColorMap: Record<string, string> = {
@@ -58,7 +60,8 @@ export function Sidebar({
   isLoading,
   onAddAccount,
   onEditAccount,
-  onOpenSettings
+  onOpenSettings,
+  onOpenKeys
 }: SidebarProps) {
   const [accountsOpen, setAccountsOpen] = useState(true);
   const { signOut, user } = useAuth();
@@ -285,6 +288,14 @@ export function Sidebar({
           </button>
         )}
         <button 
+          onClick={onOpenKeys}
+          aria-label="Gerenciar API Keys"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"
+        >
+          <Key className="w-4 h-4" aria-hidden="true" />
+          API Keys
+        </button>
+        <button
           onClick={onOpenSettings}
           aria-label="Abrir configurações"
           className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-sidebar"

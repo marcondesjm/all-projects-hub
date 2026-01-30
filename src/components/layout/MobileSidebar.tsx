@@ -15,6 +15,7 @@ interface MobileSidebarProps {
   onAddAccount?: () => void;
   onEditAccount?: (account: LovableAccount) => void;
   onOpenSettings?: () => void;
+  onOpenKeys?: () => void;
 }
 
 export function MobileSidebar(props: MobileSidebarProps) {

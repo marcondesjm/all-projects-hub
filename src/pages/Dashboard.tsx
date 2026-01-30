@@ -16,6 +16,7 @@ import { EditProjectModal } from '@/components/projects/EditProjectModal';
 import { ProjectHistoryModal } from '@/components/projects/ProjectHistoryModal';
 import { TagsManager } from '@/components/tags/TagsManager';
 import { SettingsModal } from '@/components/settings/SettingsModal';
+import { KeysManagementPanel } from '@/components/keys/KeysManagementPanel';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
 import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { GlobalSearch } from '@/components/search/GlobalSearch';
@@ -66,6 +67,7 @@ export default function Dashboard() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [keysModalOpen, setKeysModalOpen] = useState(false);
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const [historyModalOpen, setHistoryModalOpen] = useState(false);
   const [historyProjectId, setHistoryProjectId] = useState<string | null>(null);
@@ -360,6 +362,7 @@ export default function Dashboard() {
       setEditAccountOpen(true);
     },
     onOpenSettings: () => setSettingsOpen(true),
+    onOpenKeys: () => setKeysModalOpen(true),
   };
 
   return (
@@ -567,6 +570,9 @@ export default function Dashboard() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Keys Management Panel */}
+      <KeysManagementPanel open={keysModalOpen} onOpenChange={setKeysModalOpen} />
 
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav

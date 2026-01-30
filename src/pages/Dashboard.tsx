@@ -289,6 +289,7 @@ export default function Dashboard() {
     tags: p.tags?.map(t => t.name) || [],
     notes: p.notes,
     viewCount: p.view_count,
+    progress: p.progress ?? 0,
   }));
 
   const transformedAccounts = accounts.map(a => ({

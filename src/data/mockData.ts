@@ -56,6 +56,7 @@ export const mockProjects: Project[] = [
     tags: ['E-commerce', 'SaaS'],
     notes: 'Cliente muito satisfeito. Próxima fase: app mobile.',
     viewCount: 245,
+    progress: 100,
   },
   {
     id: '2',
@@ -71,6 +72,7 @@ export const mockProjects: Project[] = [
     isFavorite: true,
     tags: ['Landing Page'],
     viewCount: 189,
+    progress: 100,
   },
   {
     id: '3',
@@ -87,6 +89,7 @@ export const mockProjects: Project[] = [
     tags: ['Dashboard', 'SaaS'],
     notes: 'Em desenvolvimento. Falta integrar API de dados.',
     viewCount: 67,
+    progress: 65,
   },
   {
     id: '4',
@@ -102,6 +105,7 @@ export const mockProjects: Project[] = [
     isFavorite: false,
     tags: ['Portfolio'],
     viewCount: 312,
+    progress: 100,
   },
   {
     id: '5',
@@ -118,6 +122,7 @@ export const mockProjects: Project[] = [
     tags: ['Landing Page'],
     notes: 'Campanha encerrada. Guardando para referência.',
     viewCount: 1024,
+    progress: 100,
   },
   {
     id: '6',
@@ -133,6 +138,7 @@ export const mockProjects: Project[] = [
     isFavorite: true,
     tags: ['Blog'],
     viewCount: 567,
+    progress: 100,
   },
   {
     id: '7',
@@ -148,6 +154,7 @@ export const mockProjects: Project[] = [
     isFavorite: false,
     tags: ['Dashboard', 'SaaS'],
     viewCount: 23,
+    progress: 35,
   },
   {
     id: '8',
@@ -164,5 +171,6 @@ export const mockProjects: Project[] = [
     tags: ['E-commerce', 'SaaS'],
     notes: 'Mais de 500 alunos cadastrados!',
     viewCount: 892,
+    progress: 100,
   },
 ];

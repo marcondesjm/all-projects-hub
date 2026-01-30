@@ -35,6 +35,7 @@ export interface Project {
   is_favorite: boolean;
   notes: string | null;
   view_count: number;
+  progress: number;
   created_at: string;
   updated_at: string;
   tags?: Tag[];

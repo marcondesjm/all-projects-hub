@@ -24,6 +24,7 @@ export interface Project {
   tags: string[];
   notes?: string;
   viewCount: number;
+  progress: number;
 }
 
 export interface Tag {

@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
+import { MobileSidebar } from '@/components/layout/MobileSidebar';
 import { Header } from '@/components/layout/Header';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { FilterBar } from '@/components/projects/FilterBar';
@@ -229,33 +230,39 @@ export default function Dashboard() {
 
   const deletingProject = deletingProjectId ? projects.find(p => p.id === deletingProjectId) : null;
 
+  const sidebarProps = {
+    activeView,
+    onViewChange: handleViewChange,
+    selectedAccount,
+    onAccountChange: setSelectedAccount,
+    accounts,
+    isLoading: accountsLoading,
+    onAddAccount: () => setAddAccountOpen(true),
+    onEditAccount: (account: LovableAccount) => {
+      setEditingAccount(account);
+      setEditAccountOpen(true);
+    },
+    onOpenSettings: () => setSettingsOpen(true),
+  };
+
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar
-        activeView={activeView}
-        onViewChange={handleViewChange}
-        selectedAccount={selectedAccount}
-        onAccountChange={setSelectedAccount}
-        accounts={accounts}
-        isLoading={accountsLoading}
-        onAddAccount={() => setAddAccountOpen(true)}
-        onEditAccount={(account) => {
-          setEditingAccount(account);
-          setEditAccountOpen(true);
-        }}
-        onOpenSettings={() => setSettingsOpen(true)}
-      />
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:block">
+        <Sidebar {...sidebarProps} />
+      </div>
       
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <Header
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           viewMode={viewMode}
           onViewModeChange={setViewMode}
           onNewProject={() => setAddProjectOpen(true)}
+          mobileMenuTrigger={<MobileSidebar {...sidebarProps} />}
         />
         
-        <main className="flex-1 overflow-y-auto p-6 scrollbar-thin">
+        <main className="flex-1 overflow-y-auto p-3 sm:p-6 scrollbar-thin">
           {/* Stats */}
           <StatsCards {...stats} />
 

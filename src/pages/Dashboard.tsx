@@ -15,7 +15,7 @@ import { EditProjectModal } from '@/components/projects/EditProjectModal';
 import { TagsManager } from '@/components/tags/TagsManager';
 import { SettingsModal } from '@/components/settings/SettingsModal';
 import { OnboardingTour } from '@/components/onboarding/OnboardingTour';
-import { OnboardingChecklist } from '@/components/onboarding/OnboardingChecklist';
+import { OnboardingSidebar } from '@/components/onboarding/OnboardingSidebar';
 import { useAccounts, useProjects, useTags, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
 import { useOnboarding } from '@/hooks/useOnboarding';
 import { ProjectStatus, ProjectType } from '@/types/project';
@@ -453,9 +453,9 @@ export default function Dashboard() {
         />
       )}
 
-      {/* Onboarding Checklist */}
+      {/* Onboarding Sidebar */}
       {onboarding && !onboarding.onboarding_completed && !showTour && (
-        <OnboardingChecklist
+        <OnboardingSidebar
           hasConnectedAccount={onboarding.has_connected_account || accounts.length > 0}
           hasCreatedProject={onboarding.has_created_project || projects.length > 0}
           onConnectAccount={() => setAddAccountOpen(true)}

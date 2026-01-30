@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ProjectStatus, ProjectType } from '@/types/project';
 
 interface Tag {
@@ -42,60 +43,91 @@ export function FilterBar({
   return (
     <div className="flex flex-wrap items-center gap-3 mb-6">
       {/* Status Filter */}
-      <Select value={statusFilter} onValueChange={(value) => onStatusChange(value as ProjectStatus | 'all')}>
-        <SelectTrigger className="w-[140px] bg-card">
-          <SelectValue placeholder="Status" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos Status</SelectItem>
-          <SelectItem value="published">Publicado</SelectItem>
-          <SelectItem value="draft">Rascunho</SelectItem>
-          <SelectItem value="archived">Arquivado</SelectItem>
-        </SelectContent>
-      </Select>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <Select value={statusFilter} onValueChange={(value) => onStatusChange(value as ProjectStatus | 'all')}>
+              <SelectTrigger className="w-[140px] bg-card">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos Status</SelectItem>
+                <SelectItem value="published">Publicado</SelectItem>
+                <SelectItem value="draft">Rascunho</SelectItem>
+                <SelectItem value="archived">Arquivado</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Filtrar por status do projeto</p>
+        </TooltipContent>
+      </Tooltip>
 
       {/* Type Filter */}
-      <Select value={typeFilter} onValueChange={(value) => onTypeChange(value as ProjectType | 'all')}>
-        <SelectTrigger className="w-[140px] bg-card">
-          <SelectValue placeholder="Tipo" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">Todos Tipos</SelectItem>
-          <SelectItem value="website">Website</SelectItem>
-          <SelectItem value="landing">Landing Page</SelectItem>
-          <SelectItem value="app">Aplicativo</SelectItem>
-          <SelectItem value="funnel">Funil</SelectItem>
-          <SelectItem value="other">Outro</SelectItem>
-        </SelectContent>
-      </Select>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div>
+            <Select value={typeFilter} onValueChange={(value) => onTypeChange(value as ProjectType | 'all')}>
+              <SelectTrigger className="w-[140px] bg-card">
+                <SelectValue placeholder="Tipo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Todos Tipos</SelectItem>
+                <SelectItem value="website">Website</SelectItem>
+                <SelectItem value="landing">Landing Page</SelectItem>
+                <SelectItem value="app">Aplicativo</SelectItem>
+                <SelectItem value="funnel">Funil</SelectItem>
+                <SelectItem value="other">Outro</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Filtrar por tipo de projeto</p>
+        </TooltipContent>
+      </Tooltip>
 
       {/* Tags */}
       {tags.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
           {tags.slice(0, 6).map((tag) => (
-            <Badge
-              key={tag.id}
-              variant={tagFilter === tag.name ? 'default' : 'outline'}
-              className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
-              onClick={() => onTagChange(tagFilter === tag.name ? null : tag.name)}
-            >
-              {tag.name}
-            </Badge>
+            <Tooltip key={tag.id}>
+              <TooltipTrigger asChild>
+                <Badge
+                  variant={tagFilter === tag.name ? 'default' : 'outline'}
+                  className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
+                  onClick={() => onTagChange(tagFilter === tag.name ? null : tag.name)}
+                >
+                  {tag.name}
+                </Badge>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Clique para {tagFilter === tag.name ? 'remover' : 'filtrar por'} "{tag.name}"</p>
+              </TooltipContent>
+            </Tooltip>
           ))}
         </div>
       )}
 
       {/* Clear Filters */}
       {hasActiveFilters && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onClearFilters}
-          className="gap-1.5 text-muted-foreground hover:text-foreground"
-        >
-          <X className="w-3.5 h-3.5" />
-          Limpar filtros
-        </Button>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onClearFilters}
+              className="gap-1.5 text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-3.5 h-3.5" />
+              Limpar filtros
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Remover todos os filtros ativos</p>
+          </TooltipContent>
+        </Tooltip>
       )}
     </div>
   );

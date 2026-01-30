@@ -1,4 +1,4 @@
-import { FolderKanban, Star, Globe, Archive, AlertTriangle } from 'lucide-react';
+import { FolderKanban, Star, Globe, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface StatsCardsProps {
@@ -43,7 +43,7 @@ export function StatsCards({ totalProjects, favorites, published, archived, over
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
       {stats.map((stat) => {
         const Icon = stat.icon;
         
@@ -51,19 +51,19 @@ export function StatsCards({ totalProjects, favorites, published, archived, over
           <div
             key={stat.label}
             className={cn(
-              'bg-card rounded-xl border border-border p-4 shadow-card hover:shadow-card-hover transition-all duration-300',
+              'bg-card rounded-xl border border-border p-3 sm:p-4 shadow-card hover:shadow-card-hover transition-all duration-300',
               stat.highlight && 'border-destructive/50 animate-pulse'
             )}
           >
-            <div className="flex items-center gap-3">
-              <div className={cn('p-2.5 rounded-lg', stat.bgColor)}>
-                <Icon className={cn('w-5 h-5', stat.color)} />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className={cn('p-2 sm:p-2.5 rounded-lg shrink-0', stat.bgColor)}>
+                <Icon className={cn('w-4 h-4 sm:w-5 sm:h-5', stat.color)} />
               </div>
-              <div>
-                <p className={cn('text-2xl font-bold text-card-foreground', stat.highlight && 'text-destructive')}>
+              <div className="min-w-0">
+                <p className={cn('text-xl sm:text-2xl font-bold text-card-foreground truncate', stat.highlight && 'text-destructive')}>
                   {stat.value}
                 </p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
+                <p className="text-xs sm:text-sm text-muted-foreground truncate">{stat.label}</p>
               </div>
             </div>
           </div>

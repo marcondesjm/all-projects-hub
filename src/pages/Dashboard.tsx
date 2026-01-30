@@ -3,6 +3,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { MobileSidebar } from '@/components/layout/MobileSidebar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { Header } from '@/components/layout/Header';
+import { AppFooter } from '@/components/layout/AppFooter';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { ProjectCharts } from '@/components/dashboard/ProjectCharts';
 import { FilterBar } from '@/components/projects/FilterBar';
@@ -391,7 +392,8 @@ export default function Dashboard() {
           onClearNotifications={clearNotifications}
         />
         
-        <main className="flex-1 overflow-y-auto p-3 sm:p-6 pb-20 lg:pb-6 scrollbar-thin">
+        <main className="flex-1 overflow-y-auto scrollbar-thin flex flex-col">
+          <div className="flex-1 p-3 sm:p-6 pb-20 lg:pb-6">
           {/* Stats */}
           <StatsCards {...stats} />
 
@@ -487,6 +489,10 @@ export default function Dashboard() {
               onArchive={handleArchiveProject}
             />
           )}
+          </div>
+          
+          {/* Footer com versão */}
+          <AppFooter />
         </main>
       </div>
 

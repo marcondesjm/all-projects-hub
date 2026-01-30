@@ -2,6 +2,7 @@ import { Search, Bell, Grid3X3, List, Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ThemeToggle } from '@/components/theme/ThemeToggle';
 
 interface HeaderProps {
   searchQuery: string;
@@ -55,6 +56,9 @@ export function Header({ searchQuery, onSearchChange, viewMode, onViewModeChange
             <List className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Theme Toggle */}
+        <ThemeToggle />
 
         {/* Notifications */}
         <Button variant="ghost" size="icon" className="relative">

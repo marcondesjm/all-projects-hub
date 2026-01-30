@@ -33,6 +33,7 @@ interface SidebarProps {
   isLoading?: boolean;
   onAddAccount?: () => void;
   onEditAccount?: (account: LovableAccount) => void;
+  onOpenSettings?: () => void;
 }
 
 const accountColorMap: Record<string, string> = {
@@ -51,7 +52,8 @@ export function Sidebar({
   accounts,
   isLoading,
   onAddAccount,
-  onEditAccount
+  onEditAccount,
+  onOpenSettings
 }: SidebarProps) {
   const [accountsOpen, setAccountsOpen] = useState(true);
   const { signOut, user } = useAuth();
@@ -193,7 +195,10 @@ export function Sidebar({
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           </div>
         )}
-        <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200">
+        <button 
+          onClick={onOpenSettings}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent transition-all duration-200"
+        >
           <Settings className="w-4 h-4" />
           Configurações
         </button>

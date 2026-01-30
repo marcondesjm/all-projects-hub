@@ -10,6 +10,7 @@ import { EditAccountModal } from '@/components/accounts/EditAccountModal';
 import { AddProjectModal } from '@/components/projects/AddProjectModal';
 import { EditProjectModal } from '@/components/projects/EditProjectModal';
 import { TagsManager } from '@/components/tags/TagsManager';
+import { SettingsModal } from '@/components/settings/SettingsModal';
 import { useAccounts, useProjects, useToggleFavorite, useUpdateProject, useDeleteProject, LovableAccount, Project } from '@/hooks/useProjects';
 import { ProjectStatus, ProjectType } from '@/types/project';
 import { Loader2 } from 'lucide-react';
@@ -44,6 +45,7 @@ export default function Dashboard() {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deletingProjectId, setDeletingProjectId] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const { data: accounts = [], isLoading: accountsLoading } = useAccounts();
   const { data: projects = [], isLoading: projectsLoading } = useProjects();
@@ -241,6 +243,7 @@ export default function Dashboard() {
           setEditingAccount(account);
           setEditAccountOpen(true);
         }}
+        onOpenSettings={() => setSettingsOpen(true)}
       />
       
       <div className="flex-1 flex flex-col overflow-hidden">
@@ -364,6 +367,11 @@ export default function Dashboard() {
       <TagsManager 
         open={tagsManagerOpen} 
         onOpenChange={setTagsManagerOpen} 
+      />
+
+      <SettingsModal
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
       />
 
       {/* Delete Confirmation Dialog */}

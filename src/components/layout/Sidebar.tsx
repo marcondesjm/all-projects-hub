@@ -71,7 +71,7 @@ export function Sidebar({
 
   return (
     <aside 
-      className="w-64 h-screen bg-sidebar border-r border-sidebar-border flex flex-col"
+      className="w-64 h-full bg-sidebar border-r border-sidebar-border flex flex-col"
       role="navigation"
       aria-label="Menu principal"
     >
